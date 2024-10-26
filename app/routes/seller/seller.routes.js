@@ -38,8 +38,8 @@ module.exports = function (app) {
     controller.getSaleReportsForSeller
   );
 
-  // Read all
-  app.post(
+  // Read all   //remains
+  app.get(
     "/api/seller/getwiningnumber",
     [authJwt.verifyToken,  authJwt.isSeller],
     controller.readWinningNumber
@@ -52,7 +52,7 @@ module.exports = function (app) {
     controller.lotteryTimeCheck
   );
 
-  //Lottery Time Check
+  //Lottery Time Check //remain
   app.get(
     "/api/seller/getticketnumbers",
     [authJwt.verifyToken,  authJwt.isSeller],

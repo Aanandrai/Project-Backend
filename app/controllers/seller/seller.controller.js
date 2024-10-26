@@ -110,7 +110,7 @@ exports.signOut = async (req, res) => {
   }
 };
 
-//Create ticket
+//Create ticket //basic tested
 exports.newTicket = async (req, res) => {
   try {
     const { lotteryCategoryName, sellerId } = req.body;
@@ -241,14 +241,15 @@ exports.newTicket = async (req, res) => {
     res.status(500).send({ message: err });
   }
 };
-// Read
+// Read //tested
 exports.getTicket = async (req, res) => {
   try {
     let { fromDate, toDate, lotteryCategoryName } = req.query;
+   
     seller = mongoose.Types.ObjectId(req.userId);
     const query = { isDelete: false };
     if (fromDate && toDate) {
-      query.date = { $gte: fromDate, $lte: toDate };
+      query.date = { $gte: fromDate, $lte: toDate};
     }
     if (seller != "") {
       query.seller = seller;
@@ -256,18 +257,20 @@ exports.getTicket = async (req, res) => {
     if (lotteryCategoryName != "All Category") {
       query.lotteryCategoryName = lotteryCategoryName;
     }
-    const ticketsObj = await Ticket.find(query, {
-      _id: 1,
-      date: 1,
-      ticketId: 1,
-      lotteryCategoryName: 1,
-    });
+    const ticketsObj = await Ticket.find(query, 
+    //   {
+    //   _id: 1,
+    //   date: 1,
+    //   ticketId: 1,
+    //   lotteryCategoryName: 1,
+    // }
+    );
     res.send({ success: true, data: ticketsObj });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
-// Read
+// Read  //tested
 exports.getTicketNumbers = async (req, res) => {
   try {
     let { id } = req.query;
@@ -429,7 +432,7 @@ exports.matchWinningNumbers = async (req, res) => {
     res.status(500).send(err);
   }
 };
-// Read
+// Read //tested half ,the part when number equal to wining number not tested
 exports.getSaleReportsForSeller = async (req, res) => {
   try {
     const fromDate = req.query.fromDate;
@@ -449,10 +452,12 @@ exports.getSaleReportsForSeller = async (req, res) => {
       },
     };
 
-    if (lotteryCategoryName !== "All Category") {
+
+    if (lotteryCategoryName != "All Category") {
       query.push({ $eq: ["$lotteryCategoryName", lotteryCategoryName] });
       matchStage.$match.lotteryCategoryName = lotteryCategoryName;
     }
+  
 
     const seller_db_info = await User.findOne({ _id: seller });
 
@@ -463,7 +468,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
           from: "paymentterms",
           let: {
             lotteryCategoryName: "$lotteryCategoryName",
-            subAdmin: "$subAdmin",
+            // subAdmin: "$subAdmin",
           },
           pipeline: [
             {
@@ -507,24 +512,32 @@ exports.getSaleReportsForSeller = async (req, res) => {
         },
       },
     ]);
-
+ 
     let sumAmount = 0;
     let paidAmount = 0;
 
     result.forEach((item) => {
       const numbers = item.numbers;
+      console.log(numbers)
 
       // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
-
+      console.log(sumAmount)
       if (item.winningNumbers.length !== 0 && item.paymentTerms.length !== 0) {
+
         const winnumbers = item.winningNumbers[0].numbers;
         const payterms = item.paymentTerms[0].conditions;
+        // console.log("winnumbers",winnumbers)
+        // console.log("payterm",payterms)
         numbers.forEach((gameNumber) => {
+          
           winnumbers.forEach((winNumber) => {
+          
             if (
               gameNumber.number === winNumber.number &&
               gameNumber.gameCategory === winNumber.gameCategory
             ) {
+              console.log("gamenumber", gameNumber)
+              console.log("winNumber",winNumber)
               payterms.forEach((term) => {
                 if (
                   term.gameCategory === winNumber.gameCategory &&
@@ -535,6 +548,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
               });
             }
           });
+          console.log("sum",sumAmount)
 
           if (!gameNumber.bonus) {
             sumAmount += gameNumber.amount;
@@ -542,6 +556,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
         });
       }
     });
+    
 
     res.send({ success: true, data: { sum: sumAmount, paid: paidAmount } });
   } catch (err) {
@@ -549,10 +564,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
     res.status(500).send(err);
   }
 };
-// Read
+// Read   //tested half
 exports.readWinningNumber = async (req, res) => {
   try {
-    const { lotteryCategoryName, fromDate, toDate } = req.body;
+    const { lotteryCategoryName, fromDate, toDate } = req.query;
     let winningNumber = null;
     if (lotteryCategoryName == "All Category") {
       winningNumber = await WinningNumber.find({
@@ -568,36 +583,38 @@ exports.readWinningNumber = async (req, res) => {
     if (winningNumber.length == 0) {
       return res.send({ success: false, message: "Winning number not found" });
     }
+    //why this part 
 
-    const winNumber = [];
-    winningNumber.map((item) => {
-      let numbers = {};
-      item.numbers.map((value) => {
-        if (value.gameCategory === "BLT" && value.position === 2) {
-          numbers.second = value.number;
-        }
-        if (value.gameCategory === "BLT" && value.position === 3) {
-          numbers.third = value.number;
-        }
-        if (value.gameCategory === "L3C") {
-          numbers.l3c = value.number;
-        }
-      });
+    // const winNumber = [];
+    // winningNumber.map((item) => {
+    //   let numbers = {};
+    //   item.numbers.map((value) => {
+    //     if (value.gameCategory === "BLT" && value.position === 2) {
+    //       numbers.second = value.number;
+    //     }
+    //     if (value.gameCategory === "BLT" && value.position === 3) {
+    //       numbers.third = value.number;
+    //     }
+    //     if (value.gameCategory === "L3C") {
+    //       numbers.l3c = value.number;
+    //     }
+    //   });
 
-      winNumber.push({
-        date: item.date,
-        lotteryName: item.lotteryCategoryName,
-        numbers: numbers,
-      });
-    });
+    //   winNumber.push({
+    //     date: item.date,
+    //     lotteryName: item.lotteryCategoryName,
+    //     numbers: numbers,
+    //   });
+    // });
 
-    res.send({ success: true, data: winNumber });
+    res.send({ success: true, data: winningNumber});
   } catch (err) {
     console.log(err.message);
     res.send({ success: false, message: "Server error" });
   }
 };
 
+// tested
 exports.lotteryTimeCheck = async (req, res) => {
   try {
     const lotId = req.query.lotId;
@@ -651,14 +668,6 @@ exports.deleteTicket = async (req, res) => {
     const currentTime = moment().tz(haitiTimezone).format("HH:mm");
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
 
-    const limitGameCategoryMapping = {
-      "L4C 1": "L4C",
-      "L4C 2": "L4C",
-      "L4C 3": "L4C",
-      "L5C 1": "L5C",
-      "L5C 2": "L5C",
-      "L5C 3": "L5C",
-    };
 
     if (
       moment(new Date(today), "yyyy-MM-DD").isSame(
@@ -677,59 +686,83 @@ exports.deleteTicket = async (req, res) => {
       await Promise.all(
         numbers.map(async (item) => {
           if (!item.bonus) {
-            let limitGameCategory =
-              limitGameCategoryMapping[item.gameCategory] || item.gameCategory;
+            let limitGameCategory =item.gameCategory;
 
+              // Pipelines for aggregation
+            const hasSuperVisorId = !!subAdminInfo.superVisorId;
+
+            // Build the $or array conditionally
+            const orConditions = [
+              // Include supervisor condition only if superVisorId exists
+              ...(hasSuperVisorId
+                ? [
+                    {
+                      superVisor: mongoose.Types.ObjectId(superVisorId),
+                      "limits.gameCategory": limitGameCategory,
+                    },
+                  ]
+                : []),
+              {
+                seller: mongoose.Types.ObjectId(sellerId),
+                "limits.gameCategory": limitGameCategory,
+              },
+              {
+                "limits.gameCategory": limitGameCategory,
+              },
+            ];
+            
+            // Build the pipeline
             const pipeline = [
               {
                 $match: {
-                  subAdmin: subAdminInfo.subAdminId,
+                  subAdmin: subAdminInfo.subAdminId._id,
                   lotteryCategoryName,
-                  $or: [
-                    {
-                      seller: mongoose.Types.ObjectId(sellerId),
-                      "limits.gameCategory": limitGameCategory,
-                      "limits.gameNumber": item.number,
-                    },
-                    {
-                      "limits.gameCategory": limitGameCategory,
-                      "limits.gameNumber": item.number,
-                    },
-                    {
-                      seller: mongoose.Types.ObjectId(sellerId),
-                      "limits.gameCategory": limitGameCategory,
-                    },
-                    {
-                      "limits.gameCategory": limitGameCategory,
-                    },
-                  ],
+                  $or: orConditions,
                 },
               },
               {
                 $addFields: {
+                  priority: {
+                    $switch: {
+                      branches: [
+                        // Include supervisor priority only if superVisorId exists
+                        ...(hasSuperVisorId
+                          ? [
+                              {
+                                case: {
+                                  $eq: ["$superVisor", mongoose.Types.ObjectId(superVisorId)],
+                                },
+                                then: 1, // Highest priority
+                              },
+                            ]
+                          : []),
+                        {
+                          case: {
+                            $eq: ["$seller", mongoose.Types.ObjectId(sellerId)],
+                          },
+                          then: hasSuperVisorId ? 2 : 1, // Adjust priority based on presence of superVisorId
+                        },
+                      ],
+                      default: hasSuperVisorId ? 3 : 2, // Default priority
+                    },
+                  },
                   limits: {
                     $filter: {
                       input: "$limits",
                       cond: {
-                        $or: [
-                          {
-                            $and: [
-                              {
-                                $eq: ["$$this.gameCategory", limitGameCategory],
-                              },
-                              {
-                                $eq: ["$$this.gameNumber", item.number],
-                              },
-                            ],
-                          },
-                          {
-                            $eq: ["$$this.gameCategory", limitGameCategory],
-                          },
-                        ],
+                        $eq: ["$$this.gameCategory", limitGameCategory],
                       },
                     },
                   },
                 },
+              },
+              {
+                $sort: {
+                  priority: 1,
+                },
+              },
+              {
+                $limit: 1,
               },
               {
                 $project: {
@@ -738,23 +771,23 @@ exports.deleteTicket = async (req, res) => {
               },
             ];
 
-            const limit = await Limits.aggregate(pipeline);
+          const limit = await Limits.aggregate(pipeline);
 
-            await LimitCalc.findOneAndUpdate(
-              {
-                limitId: limit[0]._id,
-                "soldState.gameCategory": limitGameCategory,
-                "soldState.gameNumber": item.number,
+          await LimitCalc.findOneAndUpdate(
+            {
+              limitId: limit[0]._id,
+              "soldState.gameCategory": limitGameCategory,
+              "soldState.gameNumber": item.number,
+            },
+            {
+              $inc: {
+                "soldState.$.soldQuantity": -item.amount,
               },
-              {
-                $inc: {
-                  "soldState.$.soldQuantity": -item.amount,
-                },
-              },
-              { new: true }
-            );
-          }
-        })
+            },
+            { new: true }
+          );
+        }
+      })
       );
 
       ticket.isDelete = true;
@@ -777,6 +810,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
     
     // Get seller detail and populate subAdmin field
     const subAdminInfo = await User.findOne({ _id: sellerId }).populate("subAdminId");
+
     let superVisorId=subAdminInfo?.superVisorId ||""
     sellerId= mongoose.Types.ObjectId(sellerId)
 
@@ -880,7 +914,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
     ])
 
     const BLTAmount=BltTicket[0]?.totalBLT || 0;
-    // console.log("BLTAmount",BLTAmount)
+  
 
     // soft testing upto here
 
@@ -896,7 +930,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           const ticket=await Ticket.aggregate([
             {
               $match: {
-                seller: ObjectId(sellerId),
+                seller: mongoose.Types.ObjectId(sellerId),
                 lotteryCategoryName: lotteryCategoryName,
                 "numbers.gameCategory": limitGameCategory,
                 isDelete: false,
@@ -923,13 +957,14 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               }
             }
           ])
-          const gameCategoryAmount=ticket[0]?.total
+          const gameCategoryAmount=ticket[0]?.total || 0
+
 
           //now here get the percentage amount from the model
           const LimitPercentArray = await LimitPercentage.aggregate([
             { 
               $match: { 
-                subAdmin: subAdminObjectId, 
+                subAdmin: subAdminInfo.subAdminId._id, 
                 lotteryCategoryName: lotteryCategoryName 
               } 
             },
@@ -949,14 +984,14 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
           const gameLimitPercent = LimitPercentArray[0].limitPercent;
 
-          
 
           // then check the BLTAmount ka percentage should be greater then the gameCategorryAmount+item.Amount 
 
           const maxGameLimit = (gameLimitPercent / 100) * BLTAmount;
 
 
-          if(maxGameLimit < gameCategoryAmount){
+          
+          if(maxGameLimit < gameCategoryAmount+item.amount){
             return { success: false, error: `${limitGameCategory} is ${maxGameLimit} which is exceed bases on BLT amount` };
           }
         }
@@ -1052,7 +1087,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
           // getting correct limit if we have seller and admin limit 
           // check for if superVisor limit 
-          console.log(limit[0].limits)
+
 
 
 
@@ -1065,12 +1100,13 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               limitId: limit[0]._id,
               "soldState.gameCategory": limitGameCategory,
               "soldState.gameNumber": item.number,
+              date: new Date(currentDate)
             },
             {
               "soldState.$": 1,
             }
           );
-          console.log("limitCalc",limitCalc)
+
           
 
           let restQuantity = null;
@@ -1083,6 +1119,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             {
               $match: {
                 limitId: limit[0]._id,
+                date: new Date(currentDate)
               },
             },
             {
@@ -1113,9 +1150,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           const totalSold = totalSoldQuantity.length > 0 ? totalSoldQuantity[0].totalSold : 0;
 
 
-          console.log("totalSold",totalSold)
           
-
+          
           // let you want to input 10x20 and its your frist time to buy item
           // but you have buy the 20x10 then 10x20 (limitcalc=undefined) then if condition not run
           // but it have totalSold then it have to run
@@ -1155,12 +1191,12 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 availableAmount: limit[0].limits[0]?.limitsButs-totalSold,
               });
 
-              addAmount = limit[0].limits[0]?.limitsButs;
+              addAmount = limit[0].limits[0]?.limitsButs-totalSold;
             } else {
               addAmount = item.amount;
             }
 
-            limitCalc = await LimitCalc.findOne({ limitId: limit[0]._id });
+            limitCalc = await LimitCalc.findOne({ limitId: limit[0]._id , date: new Date(currentDate)});
 
             if (limitCalc) {
               limitCalc.soldState.push({
@@ -1173,6 +1209,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             } else {
               const newLimitCalc = new LimitCalc({
                 limitId: limit[0]._id,
+                date: new Date(currentDate),
                 soldState: [
                   {
                     gameCategory: limitGameCategory,

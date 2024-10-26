@@ -104,7 +104,6 @@ exports.getSaleReports = async (req, res) => {
 
     const resultBySeller = {};
 
-    console.log(result[0])
     result.forEach((item) => {
       
       const sellerName = item.seller;

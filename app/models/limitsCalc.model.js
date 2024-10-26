@@ -9,6 +9,10 @@ const limitsCalcSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Limits",
     },
+    date: {
+      type: Date,
+      // required: true
+    },
     soldState: {
       type: [
         {
