@@ -5,6 +5,9 @@ const bodyParser = require("body-parser");
 const cron = require("node-cron");
 const cookieSession = require("cookie-session");
 const dbConfig = require("./config/db.config");
+const dotenv =require("dotenv")
+
+dotenv.config()
 
 const authRoutes = require("./routes/auth.routes");
 const lotteryCategoryRoutes = require("./routes/admin/lotteryCategory.routes");

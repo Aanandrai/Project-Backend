@@ -1,7 +1,14 @@
+const dotenv = require("dotenv");
+
+const path = require("path");
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+
 module.exports = {
-  HOST: "127.0.0.1", //"localhost",
+  HOST: "127.0.0.1", // "localhost",
   PORT: 27017,
-  DB: "mongodb+srv://raiaanand330:YKaQpOV8BO7USBW6@cluster0.g3brr.mongodb.net",
+  DB: process.env.DB_URL,
 };
 // mongodb+srv://<db_username>:<db_password>@project.ewo1t.mongodb.net/
 // mongodb+srv://<db_username>:<db_password>@project.ewo1t.mongodb.net/?retryWrites=true&w=majority&appName=project
