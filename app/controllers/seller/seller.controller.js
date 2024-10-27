@@ -113,7 +113,8 @@ exports.signOut = async (req, res) => {
 //Create ticket //basic tested
 exports.newTicket = async (req, res) => {
   try {
-    const { lotteryCategoryName, sellerId } = req.body;
+    const { lotteryCategoryName } = req.body;
+    const sellerId=req.userId
     // const numbers = JSON.parse(req.body.numbers);
     const numbers = req.body.numbers;
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
@@ -129,12 +130,13 @@ exports.newTicket = async (req, res) => {
       moment(currentTime, "HH:mm").isBefore(moment(lotInfo.endTime, "HH:mm"))
     ) {
 
-    
+
       const { success, error, limit_data, block_data, new_numbers } =
         await requestTicketCheck(lotteryCategoryName, sellerId, numbers ,lotInfo.startTime);
 
       if (!success) {
         console.log("ticket check error: ", error);
+        
         // return res.send(
         //   encoding({
         //     success: false,
@@ -518,10 +520,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
 
     result.forEach((item) => {
       const numbers = item.numbers;
-      console.log(numbers)
+  
 
       // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
-      console.log(sumAmount)
+      // console.log(sumAmount)
       if (item.winningNumbers.length !== 0 && item.paymentTerms.length !== 0) {
 
         const winnumbers = item.winningNumbers[0].numbers;
@@ -536,8 +538,8 @@ exports.getSaleReportsForSeller = async (req, res) => {
               gameNumber.number === winNumber.number &&
               gameNumber.gameCategory === winNumber.gameCategory
             ) {
-              console.log("gamenumber", gameNumber)
-              console.log("winNumber",winNumber)
+              // console.log("gamenumber", gameNumber)
+              // console.log("winNumber",winNumber)
               payterms.forEach((term) => {
                 if (
                   term.gameCategory === winNumber.gameCategory &&
@@ -548,7 +550,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
               });
             }
           });
-          console.log("sum",sumAmount)
+          // console.log("sum",sumAmount)
 
           if (!gameNumber.bonus) {
             sumAmount += gameNumber.amount;
@@ -800,7 +802,7 @@ exports.deleteTicket = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ message: err.message });
   }
 };
@@ -843,7 +845,9 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
       for (let i = numbers.length - 1; i >= 0; i--) {
         const item = numbers[i];
         //if it have sellerId and equal to userId
+       
         if(blockItem?.seller && sellerId.equals(blockItem.seller) ){
+         
           if (blockItem.gameCategory === item.gameCategory && blockItem.number === item.number) {
             block_data.push(blockItem)
             matchedNumbers.add(i);
@@ -867,16 +871,6 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
       }
     }
 
-
-
-    // const limitGameCategoryMapping = {
-    //   "L4C 1": "L4C",
-    //   "L4C 2": "L4C",
-    //   "L4C 3": "L4C",
-    //   "L5C 1": "L5C",
-    //   "L5C 2": "L5C",
-    //   "L5C 3": "L5C",
-    // };
 
     const limit_data = [];
     const new_numbers = [];
@@ -918,11 +912,11 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
     // soft testing upto here
 
-
     for (let index = 0; index < numbers.length; index++) {
       const item = numbers[index];
+  
       if (!matchedNumbers.has(index)) {
-        // let limitGameCategory = limitGameCategoryMapping[item.gameCategory] || item.gameCategory;
+        
         let limitGameCategory =item.gameCategory;
 
         // if you have other gameCategory the BLT check the percentage limit
@@ -988,8 +982,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           // then check the BLTAmount ka percentage should be greater then the gameCategorryAmount+item.Amount 
 
           const maxGameLimit = (gameLimitPercent / 100) * BLTAmount;
-
-
+         
           
           if(maxGameLimit < gameCategoryAmount+item.amount){
             return { success: false, error: `${limitGameCategory} is ${maxGameLimit} which is exceed bases on BLT amount` };
@@ -1106,6 +1099,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               "soldState.$": 1,
             }
           );
+        
 
           
 
@@ -1157,7 +1151,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           // but it have totalSold then it have to run
           if (limitCalc) {
             restQuantity = limit[0].limits[0]?.limitsButs - totalSold;
-            console.log(restQuantity)
+           
             
 
             if (item.amount > restQuantity) {
@@ -1166,7 +1160,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             } else {
               addAmount = item.amount;
             }
-            console.log(addAmount)
+
 
             if (addAmount > 0) {
               await LimitCalc.findOneAndUpdate(
@@ -1205,6 +1199,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 soldQuantity: addAmount,
               });
 
+             
               await limitCalc.save();
             } else {
               const newLimitCalc = new LimitCalc({
@@ -1220,6 +1215,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               });
 
               await newLimitCalc.save();
+
+
             }
           }
 
@@ -1232,6 +1229,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
         acceptedAmountSum += item.amount;
       }
+
     }
 
     // It is working fine for BLT  Not tested percentage Limit Part

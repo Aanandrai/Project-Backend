@@ -54,7 +54,7 @@ exports.getBlockNumber = async (req, res) => {
 // Update
 exports.updateBlockNumber = async (req, res) => {
   const { id } = req.params;
-  const { lotteryCategoryName, gameCategory, number } = req.body;
+  const { lotteryCategoryName, gameCategory, number ,sellerId ,superVisorId } = req.body;
 
   try {
     let blockNumber = await BlockNumber.findById(id);
@@ -66,6 +66,9 @@ exports.updateBlockNumber = async (req, res) => {
     blockNumber.lotteryCategoryName = lotteryCategoryName;
     blockNumber.gameCategory = gameCategory;
     blockNumber.number = number;
+    blockNumber.seller=sellerId,
+    blockNumber.superVisor=superVisorId
+
 
     blockNumber = await blockNumber.save();
 
