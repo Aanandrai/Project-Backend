@@ -587,27 +587,27 @@ exports.readWinningNumber = async (req, res) => {
     }
     //why this part 
 
-    // const winNumber = [];
-    // winningNumber.map((item) => {
-    //   let numbers = {};
-    //   item.numbers.map((value) => {
-    //     if (value.gameCategory === "BLT" && value.position === 2) {
-    //       numbers.second = value.number;
-    //     }
-    //     if (value.gameCategory === "BLT" && value.position === 3) {
-    //       numbers.third = value.number;
-    //     }
-    //     if (value.gameCategory === "L3C") {
-    //       numbers.l3c = value.number;
-    //     }
-    //   });
+    const winNumber = [];
+    winningNumber.map((item) => {
+      let numbers = {};
+      item.numbers.map((value) => {
+        if (value.gameCategory === "BLT" && value.position === 2) {
+          numbers.second = value.number;
+        }
+        if (value.gameCategory === "BLT" && value.position === 3) {
+          numbers.third = value.number;
+        }
+        if (value.gameCategory === "L3C") {
+          numbers.l3c = value.number;
+        }
+      });
 
-    //   winNumber.push({
-    //     date: item.date,
-    //     lotteryName: item.lotteryCategoryName,
-    //     numbers: numbers,
-    //   });
-    // });
+      winNumber.push({
+        date: item.date,
+        lotteryName: item.lotteryCategoryName,
+        numbers: numbers,
+      });
+    });
 
     res.send({ success: true, data: winningNumber});
   } catch (err) {
