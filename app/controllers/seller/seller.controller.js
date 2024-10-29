@@ -29,40 +29,40 @@ exports.signIn = async (req, res) => {
     const user = await User.findOne({ imei }).populate("subAdminId");
 
     if (!user) {
-      // res.send(encoding({ success: false, message: "User not found!" }));
-      res.send({ success: false, message: "User not found!" });
+      res.send(encoding({ success: false, message: "User not found!" }));
+      // res.send({ success: false, message: "User not found!" });
       return;
     }
 
     if (!user.isActive) {
-      // res.send(encoding({ success: false, message: "This user locked now!" }));
-      res.send({ success: false, message: "This user locked now!" });
+      res.send(encoding({ success: false, message: "This user locked now!" }));
+      // res.send({ success: false, message: "This user locked now!" });
       return;
     }
 
     if (!user.subAdminId.isActive) {
-      // res.send(
-      //   encoding({
-      //     success: false,
-      //     message: "Votre compagnie est deconnecée",
-      //   })
-      // );
-      res.send({
+      res.send(
+        encoding({
           success: false,
           message: "Votre compagnie est deconnecée",
-        }
+        })
       );
+      // res.send({
+      //     success: false,
+      //     message: "Votre compagnie est deconnecée",
+      //   }
+      // );
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     
     if (!isMatch) {
-      // res.send(
-      //   encoding({ success: false, message: "Mot de passe incorrecte" })
-      // );
+      res.send(
+        encoding({ success: false, message: "Mot de passe incorrecte" })
+      );
 
-      res.send({ success: false, message: "Mot de passe incorrecte" });
+      // res.send({ success: false, message: "Mot de passe incorrecte" });
       return;
     }
 
@@ -97,7 +97,7 @@ exports.signIn = async (req, res) => {
 
   } catch (err) {
     // console.log(err);
-    res.status(500).send({ message: err });
+    res.status(500).send(encoding({ message: err }));
   }
 };
 
@@ -135,7 +135,7 @@ exports.newTicket = async (req, res) => {
         await requestTicketCheck(lotteryCategoryName, sellerId, numbers ,lotInfo.startTime);
 
       if (!success) {
-        // console.log("ticket check error: ", error);
+        console.log("ticket check error: ", error);
         
         // return res.send(
         //   encoding({
@@ -224,24 +224,24 @@ exports.newTicket = async (req, res) => {
         return;
       }
     } else {
-      res.send(
-        encoding({
-          success: false,
-          message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
-        })
-      );
       // res.send(
-      //   {
+      //   encoding({
       //     success: false,
       //     message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
-      //   }
+      //   })
       // );
+      res.send(
+        {
+          success: false,
+          message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
+        }
+      );
       return;
     }
   } catch (err) {
     // console.log(err);
-    // res.status(500).send(encoding({ message: err }));
-    res.status(500).send({ message: err });
+    res.status(500).send(encoding({ message: err }));
+    // res.status(500).send({ message: err });
   }
 };
 // Read //tested
@@ -901,7 +901,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
         
         let limitGameCategory =item.gameCategory;
 
-        let maxGameLimit=0
+        let maxGameLimit=item.amount
         // if you have other gameCategory the BLT check the percentage limit
         if(limitGameCategory!="BLT"){
 
@@ -927,12 +927,13 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             }
           ]);
 
-          const gameLimitPercent = LimitPercentArray[0].limitPercent;
+          const gameLimitPercent = LimitPercentArray[0]?.limitPercent;
 
 
           // then check the BLTAmount ka percentage should be greater then the gameCategorryAmount+item.Amount 
-
+          if(LimitPercentArray.length >0){
            maxGameLimit = Math.floor((gameLimitPercent / 100) * totalBLTAmount)
+          }
           
         }
           //This is how much amount a person put using percentageLimit
@@ -1003,7 +1004,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           const totalSoldQuantitySubAdmin = await LimitCalc.aggregate([
             {
               $match: {
-                limitId: subAdminLimit[0]._id,
+                limitId: subAdminLimitId,
                 date: new Date(currentDate)
               },
             },
@@ -1042,6 +1043,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           // finding seller or supervisor remaining amount and the actualAmount to put on a number 
         const hasSuperVisorId = !!subAdminInfo?.superVisorId;
         let actualmaxAmountPriceBuy=0;
+        let remainingQuantityOther=item.amount
 
         if(hasSuperVisorId){
           // if it have supervisorId then find the superVisorlimt
@@ -1066,7 +1068,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           ]);
 
           otherLimitId=superVisorLimit[0]?._id
-          let remainingQuantitySuperVisor=maxAmountPriceBuy
+          remainingQuantityOther=maxAmountPriceBuy
           if (superVisorLimit?.length > 0) {
               let soldQuantitySuperVisor = await LimitCalc.findOne(
               {
@@ -1111,10 +1113,10 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             ]);
 
             const totalSoldBySuperVisor = totalSoldQuantity?.length > 0 ? totalSoldQuantity[0]?.totalSold : 0;
-            remainingQuantitySuperVisor=superVisorLimit[0]?.limits?.limitsButs-totalSoldBySuperVisor
+            remainingQuantityOther=superVisorLimit[0]?.limits?.limitsButs-totalSoldBySuperVisor
           }
           // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySuperVisor )
-          actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy, remainingQuantitySubAdmin, remainingQuantitySuperVisor);
+        
         }
         else{
           // try to find seller limit if it doesnot have supervisor mean independent seller
@@ -1139,7 +1141,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           ]);
 
           otherLimitId=sellerLimit?._id
-          const remainingQuantitySeller=maxAmountPriceBuy
+          const remainingQuantityOther=maxAmountPriceBuy
           if(sellerLimit?.length>0){
 
             let soldQuantitySeller = await LimitCalc.findOne(
@@ -1190,12 +1192,13 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             ]);
 
             const totalSoldBySeller = totalSoldQuantity?.length > 0 ? totalSoldQuantity[0].totalSold : 0;
-            remainingQuantitySeller=sellerLimit[0]?.limits?.limitsButs-totalSoldBySeller
+            remainingQuantityOther=sellerLimit[0]?.limits?.limitsButs-totalSoldBySeller
             
           }
           // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
-          actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller)
         }
+
+        actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy, remainingQuantitySubAdmin, remainingQuantityOther);
 
         // console.log(actualmaxAmountPriceBuy)
 
