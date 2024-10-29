@@ -39,7 +39,7 @@ const app = express();
 // app.use(cors({ origin: "http://localhost:3000" }));
 
 const corsOptions = {
-  origin: '*', // allow this origin to access the resource
+  origin: 'https://gwtech.vercel.app', // allow this origin to access the resource
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // allow credentials (cookies, authorization headers, etc.)
   preflightContinue: false, // pass the CORS preflight response to the next handler
