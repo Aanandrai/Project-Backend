@@ -71,20 +71,8 @@ exports.signIn = async (req, res) => {
     });
 
     req.session.token = token;
-    res.send(
-      encoding({
-        success: true,
-        token: token,
-        userName: user.userName,
-        companyName: user.subAdminId.companyName,
-        phoneNumber: user.subAdminId.phoneNumber,
-        address: user.subAdminId.address,
-        sellerId: user._id,
-        subAdminId: user.subAdminId._id,
-      })
-    );
-    
-    // res.send({
+    // res.send(
+    //   encoding({
     //     success: true,
     //     token: token,
     //     userName: user.userName,
@@ -93,7 +81,19 @@ exports.signIn = async (req, res) => {
     //     address: user.subAdminId.address,
     //     sellerId: user._id,
     //     subAdminId: user.subAdminId._id,
-    //   });
+    //   })
+    // );
+    
+    res.send({
+        success: true,
+        token: token,
+        userName: user.userName,
+        companyName: user.subAdminId.companyName,
+        phoneNumber: user.subAdminId.phoneNumber,
+        address: user.subAdminId.address,
+        sellerId: user._id,
+        subAdminId: user.subAdminId._id,
+      });
 
   } catch (err) {
     // console.log(err);
@@ -137,18 +137,19 @@ exports.newTicket = async (req, res) => {
       if (!success) {
         // console.log("ticket check error: ", error);
         
-        return res.send(
-          encoding({
-            success: false,
-            message: "ticket save failed! try again!",
-          })
-        );
         // return res.send(
-        //   {
+        //   encoding({
         //     success: false,
         //     message: "ticket save failed! try again!",
-        //   }
+        //   })
         // );
+        return res.send(
+          {
+            success: false,
+            message: "ticket save failed! try again!",
+            error:error,
+          }
+        );
       }
 
       if (new_numbers.length > 0) {
@@ -163,63 +164,63 @@ exports.newTicket = async (req, res) => {
         await ticket.save((err, savedTicket) => {
           if (err) {
             console.log("new ticket data error :", err);
-            res.send(
-              encoding({
-                success: false,
-                message: "new ticket create failed! please try again!",
-              })
-            );
             // res.send(
-            //   {
+            //   encoding({
             //     success: false,
             //     message: "new ticket create failed! please try again!",
-            //   }
+            //   })
             // );
+            res.send(
+              {
+                success: false,
+                message: "new ticket create failed! please try again!",
+              }
+            );
             return;
           } else {
             const newId = savedTicket.ticketId;
-            res.send(
-              encoding({
-                success: true,
-                message: "success",
-                ticketId: newId,
-                numbers: new_numbers,
-                limit_data,
-                block_data,
-              })
-            );
             // res.send(
-            //  {
+            //   encoding({
             //     success: true,
             //     message: "success",
             //     ticketId: newId,
             //     numbers: new_numbers,
             //     limit_data,
             //     block_data,
-            //   }
+            //   })
             // );
+            res.send(
+             {
+                success: true,
+                message: "success",
+                ticketId: newId,
+                numbers: new_numbers,
+                limit_data,
+                block_data,
+              }
+            );
             return;
           }
         });
       } else {
-        res.send(
-          encoding({
-            success: true,
-            message: "you cant create ticket!",
-            numbers: new_numbers,
-            limit_data,
-            block_data,
-          })
-        );
         // res.send(
-        //  {
+        //   encoding({
         //     success: true,
         //     message: "you cant create ticket!",
         //     numbers: new_numbers,
         //     limit_data,
         //     block_data,
-        //   }
+        //   })
         // );
+        res.send(
+         {
+            success: true,
+            message: "you cant create ticket!",
+            numbers: new_numbers,
+            limit_data,
+            block_data,
+          }
+        );
         return;
       }
     } else {
@@ -239,8 +240,8 @@ exports.newTicket = async (req, res) => {
     }
   } catch (err) {
     // console.log(err);
-    res.status(500).send(encoding({ message: err }));
-    // res.status(500).send({ message: err });
+    // res.status(500).send(encoding({ message: err }));
+    res.status(500).send({ message: err });
   }
 };
 // Read //tested
