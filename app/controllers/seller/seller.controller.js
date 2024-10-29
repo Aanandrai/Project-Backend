@@ -901,7 +901,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
         
         let limitGameCategory =item.gameCategory;
 
-        let maxGameLimit=0
+        let maxGameLimit=item.amount
         // if you have other gameCategory the BLT check the percentage limit
         if(limitGameCategory!="BLT"){
 
@@ -927,12 +927,13 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             }
           ]);
 
-          const gameLimitPercent = LimitPercentArray[0].limitPercent;
+          const gameLimitPercent = LimitPercentArray[0]?.limitPercent;
 
 
           // then check the BLTAmount ka percentage should be greater then the gameCategorryAmount+item.Amount 
-
+          if(LimitPercentArray.length>0){
            maxGameLimit = Math.floor((gameLimitPercent / 100) * totalBLTAmount)
+          }
           
         }
           //This is how much amount a person put using percentageLimit
