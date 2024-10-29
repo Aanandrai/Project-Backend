@@ -956,6 +956,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
          let subAdminLimitId=null
          let otherLimitId=null
+         let remainingQuantitySubAdmin=item.amount
         const alternateNumber = item.number.split("x").reverse().join("x");
         const subAdminLimit = await Limits.aggregate([
           {
@@ -985,7 +986,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           },
         ]);
 
-        let remainingQuantitySubAdmin=maxAmountPriceBuy
+        
         subAdminLimitId=subAdminLimit[0]?._id
 
       
@@ -1197,7 +1198,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           }
           // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
         }
-
+        console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
         actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy, remainingQuantitySubAdmin, remainingQuantityOther);
 
         // console.log(actualmaxAmountPriceBuy)
