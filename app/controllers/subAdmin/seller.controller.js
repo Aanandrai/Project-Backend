@@ -62,6 +62,44 @@ exports.getseller = async (req, res) => {
   }
 };
 
+
+exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
+  try {
+    // Fetch active sellers without a supervisor
+    const users = await User.find({
+      subAdminId: req.userId,
+      role: "seller",
+      superVisorId: { $exists: false }, // Ensure superVisorId does not exist
+      isActive: true // Ensure the seller is active
+    })
+    .exec();
+
+    // Fetch sub-admin details (companyName, bonusFlag)
+    const subadmin = await User.findOne(
+      { _id: req.userId },
+      { companyName: 1, bonusFlag: 1 }
+    );
+
+    res.send({
+      success: true,
+      users: users.map((user) => ({
+        _id: user._id,
+        userName: user.userName,
+        isActive: user.isActive,
+        imei: user.imei,
+      })),
+      companyName: subadmin?.companyName,
+      bonusFlag: subadmin?.bonusFlag,
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+
+
 // Update //tested
 exports.updateseller = async (req, res) => {
   const updates = Object.keys(req.body);

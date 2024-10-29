@@ -53,12 +53,46 @@ exports.addLimitBut = async (req, res) => {
 
 // Read //it have to modify for seller / supervisor // subadmin
 //Now it is for all 
-exports.getLimitBut = async (req, res) => {
+exports.getLimitButAll = async (req, res) => {
+  try {
+    let limits=null
+    limits = await LimitBut.find({
+    subAdmin: req.userId,
+    superVisor: { $exists: false }, // Ensure superVisor does not exist
+    seller: { $exists: false } // Ensure seller does not exist
+  })
+
+    res.json(limits);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.getLimitButSeller = async (req, res) => {
   try {
     let limits = null;
-      limits = await LimitBut.find({
-        subAdmin: req.userId,
-      }).populate("seller");
+    limits = await LimitBut.find({
+      subAdmin: req.userId,
+      superVisor: { $exists: false },
+      seller:{$exists:true} // Ensure superVisor does not exist
+    }).populate("seller");
+
+    res.json(limits);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.getLimitButSuperVisor = async (req, res) => {
+  try {
+    let limits = null;
+    limits = await LimitBut.find({
+      subAdmin: req.userId,
+      superVisor:{$exists:true},
+      seller: { $exists: false } // Ensure seller does not exist
+    }).populate("superVisor");
 
     res.json(limits);
   } catch (err) {

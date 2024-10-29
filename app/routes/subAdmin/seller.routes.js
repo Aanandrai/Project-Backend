@@ -21,6 +21,12 @@ module.exports = function (app) {
     controller.getseller
   );
 
+  app.get(
+    "/api/subadmin/getsellerWhoNotHaveSupervisor",
+    [authJwt.verifyToken, authJwt.isSubAdmin],
+    controller.getsellerWhoNotHaveSupervisor
+  );
+
   // Update Sub Admin
   app.patch(
     "/api/subadmin/updateseller/:id",
