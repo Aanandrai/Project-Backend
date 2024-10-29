@@ -1198,7 +1198,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           }
           // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
         }
-        console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
+        console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantityOther )
         actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy, remainingQuantitySubAdmin, remainingQuantityOther);
 
         // console.log(actualmaxAmountPriceBuy)
