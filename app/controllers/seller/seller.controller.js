@@ -1003,7 +1003,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           const totalSoldQuantitySubAdmin = await LimitCalc.aggregate([
             {
               $match: {
-                limitId: subAdminLimit[0]._id,
+                limitId: subAdminLimitId,
                 date: new Date(currentDate)
               },
             },
