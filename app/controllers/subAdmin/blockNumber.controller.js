@@ -29,7 +29,7 @@ exports.addBlockNumber = async (req, res) => {
 
     res.status(201).json(blockNumber);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -46,7 +46,7 @@ exports.getBlockNumber = async (req, res) => {
 
     res.json(blockNumbers);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -74,7 +74,7 @@ exports.updateBlockNumber = async (req, res) => {
 
     res.json(blockNumber);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -94,7 +94,7 @@ exports.deleteBlockNumber = async (req, res) => {
 
     res.json({ message: 'Block number removed' });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 };

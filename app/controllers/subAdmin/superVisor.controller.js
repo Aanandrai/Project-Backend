@@ -23,7 +23,7 @@ exports.addsuperVisor = async (req, res) => {
     await user.save();
     res.status(201).send(user);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res
       .status(500)
       .send({ message: "Error creating supervisor.", error: err.message });
@@ -39,7 +39,7 @@ exports.getsuperVisor = async (req, res) => {
     });
     res.send(users);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res
       .status(500)
       .send({ message: "Error retrieving supervisors.", error: err.message });
@@ -70,7 +70,7 @@ exports.updatesuperVisor = async (req, res) => {
     await user.save();
     res.send(user);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res
       .status(400)
       .send({ message: "Error updating supervisor.", error: err.message });
@@ -86,7 +86,7 @@ exports.deletesuperVisor = async (req, res) => {
     }
     res.send({ message: "Supervisor deleted successfully.", user });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res
       .status(500)
       .send({ message: "Error deleting supervisor.", error: err.message });

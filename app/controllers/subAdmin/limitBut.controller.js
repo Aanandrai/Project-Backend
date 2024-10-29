@@ -6,50 +6,73 @@ const LimitBut = db.limits;
 // Create
 //this is updated for supervisor limit
 exports.addLimitBut = async (req, res) => {
-  const { lotteryCategoryName, limits, seller ,superVisor} = req.body;
+  const { lotteryCategoryName, limits, seller, superVisor } = req.body;
   try {
     let newLimit = null;
-    
-      if (seller) {
+
+    if (seller) {
+      const isExist = await LimitBut.findOne({
+        subAdmin: req.userId,
+        lotteryCategoryName,
+        seller,
+      });
+
+      if (isExist) {
+        return res.status(500).json({ message: "Limit of this seller already exists for this Lottery" });
+      }
+
+      newLimit = new LimitBut({
+        subAdmin: req.userId,
+        lotteryCategoryName,
+        limits,
+        seller,
+      });
+    } else {
+      if (superVisor) {
+        const isExist = await LimitBut.findOne({
+          subAdmin: req.userId,
+          lotteryCategoryName,
+          superVisor,
+        });
+
+        if (isExist) {
+          return res.status(500).json({ message: "Limit of this Supervisor already exists for this Lottery" });
+        }
+
+        newLimit = new LimitBut({
+          subAdmin: req.userId,
+          superVisor,
+          lotteryCategoryName,
+          limits,
+        });
+      } else {
+        const isExist = await LimitBut.findOne({
+          subAdmin: req.userId,
+          lotteryCategoryName,
+        });
+
+        if (isExist) {
+          return res.status(500).json({ message: "All Limits already exist for this Lottery" });
+        }
 
         newLimit = new LimitBut({
           subAdmin: req.userId,
           lotteryCategoryName,
           limits,
-          seller,
         });
-      } else {
-    
-        if(superVisor){
-
-          newLimit = new LimitBut({
-            subAdmin: req.userId,
-            superVisor,
-            lotteryCategoryName,
-            limits,
-          });
-
-        }
-        else{
-          newLimit = new LimitBut({
-            subAdmin: req.userId,
-            lotteryCategoryName,
-            limits,
-          });
-        }
-
-        
       }
+    }
 
     await newLimit.save();
     newLimit = await LimitBut.findById(newLimit._id).populate("seller");
 
     res.send(newLimit);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 // Read //it have to modify for seller / supervisor // subadmin
 //Now it is for all 
@@ -64,7 +87,7 @@ exports.getLimitButAll = async (req, res) => {
 
     res.json(limits);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -80,7 +103,7 @@ exports.getLimitButSeller = async (req, res) => {
 
     res.json(limits);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -96,7 +119,7 @@ exports.getLimitButSuperVisor = async (req, res) => {
 
     res.json(limits);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -134,7 +157,7 @@ exports.updateLimitBut = async (req, res) => {
 
     res.json(limit);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -156,7 +179,7 @@ exports.deleteLimitBut = async (req, res) => {
 
     res.json({ message: "Limit removed" });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 };

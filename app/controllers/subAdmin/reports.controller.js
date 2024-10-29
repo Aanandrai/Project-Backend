@@ -154,7 +154,7 @@ exports.getSaleReports = async (req, res) => {
 
     res.send({ success: true, data: resultBySeller });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send(err);
   }
 };
@@ -444,7 +444,7 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
 
     res.send({ success: true, data: resultBySeller });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send(err);
   }
 };

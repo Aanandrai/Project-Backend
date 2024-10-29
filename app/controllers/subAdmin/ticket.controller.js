@@ -145,14 +145,14 @@ exports.matchWinningNumbers = async (req, res) => {
       },
     ]).exec((err, result) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         res.send({ success: false, message: "not found!" });
       } else {
         const winTicket = [];
         
         // Process the result
         result.forEach((item) => {
-          console.log(item)
+          // console.log(item)
 
           let numbers = item.numbers;
           if (item.winningNumbers.length == 0) return false;
@@ -215,7 +215,7 @@ exports.matchWinningNumbers = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send(err);
   }
 };
@@ -352,7 +352,7 @@ exports.deleteTicket = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ message: err.message });
   }
 };
@@ -394,7 +394,7 @@ exports.deleteTicketForever = async (req, res) => {
     await Ticket.deleteOne({_id: mongoose.Types.ObjectId(req.params.id)});
     return res.send({ success: true, message: "Ticket deleted" });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ message: err.message });
   }
 };

@@ -41,7 +41,7 @@ exports.readWinningNumber = async (req, res) => {
 
     res.send({ success: true, data: winNumber });
   } catch (err) {
-    console.log(err.message);
+    // console.log(err.message);
     res.send({ success: false, message: "Server error" });
   }
 };

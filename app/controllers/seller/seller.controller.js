@@ -96,7 +96,7 @@ exports.signIn = async (req, res) => {
       });
 
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ message: err });
   }
 };
@@ -135,7 +135,7 @@ exports.newTicket = async (req, res) => {
         await requestTicketCheck(lotteryCategoryName, sellerId, numbers ,lotInfo.startTime);
 
       if (!success) {
-        console.log("ticket check error: ", error);
+        // console.log("ticket check error: ", error);
         
         // return res.send(
         //   encoding({
@@ -162,7 +162,7 @@ exports.newTicket = async (req, res) => {
 
         await ticket.save((err, savedTicket) => {
           if (err) {
-            console.log("new ticket data error :", err);
+            // console.log("new ticket data error :", err);
             // res.send(
             //   encoding({
             //     success: false,
@@ -238,7 +238,7 @@ exports.newTicket = async (req, res) => {
       return;
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     // res.status(500).send(encoding({ message: err }));
     res.status(500).send({ message: err });
   }
@@ -372,7 +372,7 @@ exports.matchWinningNumbers = async (req, res) => {
       },
     ]).exec((err, result) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         res.send({ success: false, message: "not found!" });
       } else {
         const winTicket = [];
@@ -430,7 +430,7 @@ exports.matchWinningNumbers = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send(err);
   }
 };
@@ -562,7 +562,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
 
     res.send({ success: true, data: { sum: sumAmount, paid: paidAmount } });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send(err);
   }
 };
@@ -611,7 +611,7 @@ exports.readWinningNumber = async (req, res) => {
 
     res.send({ success: true, data: winningNumber});
   } catch (err) {
-    console.log(err.message);
+    // console.log(err.message);
     res.send({ success: false, message: "Server error" });
   }
 };
@@ -648,7 +648,7 @@ exports.lotteryTimeCheck = async (req, res) => {
       return;
     }
   } catch (err) {
-    console.log("time check error: ", err);
+    // console.log("time check error: ", err);
     res.send({ success: false, data: false });
   }
 };
@@ -1475,7 +1475,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
     return { success: true, block_data, limit_data, new_numbers };
   } catch (error) {
-    console.log("ticket check error: ", error);
+    // console.log("ticket check error: ", error);
     return { success: false, error: error };
   }
 }
@@ -1513,7 +1513,7 @@ exports.deleteTicketForever = async (req, res) => {
     await Ticket.deleteOne({ _id: mongoose.Types.ObjectId(req.params.id) });
     return res.send({ success: true, message: "Ticket deleted" });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ message: err.message });
   }
 };
