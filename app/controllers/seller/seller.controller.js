@@ -97,7 +97,7 @@ exports.signIn = async (req, res) => {
 
   } catch (err) {
     // console.log(err);
-    res.status(500).send(encoding({ message: err }));
+    res.status(500).send({ message: err });
   }
 };
 
@@ -135,7 +135,7 @@ exports.newTicket = async (req, res) => {
         await requestTicketCheck(lotteryCategoryName, sellerId, numbers ,lotInfo.startTime);
 
       if (!success) {
-        console.log("ticket check error: ", error);
+        // console.log("ticket check error: ", error);
         
         // return res.send(
         //   encoding({
@@ -203,39 +203,39 @@ exports.newTicket = async (req, res) => {
           }
         });
       } else {
-        // res.send(
-        //   encoding({
-        //     success: true,
-        //     message: "you cant create ticket!",
-        //     numbers: new_numbers,
-        //     limit_data,
-        //     block_data,
-        //   })
-        // );
         res.send(
-         {
+          encoding({
             success: true,
             message: "you cant create ticket!",
             numbers: new_numbers,
             limit_data,
             block_data,
-          }
+          })
         );
+        // res.send(
+        //  {
+        //     success: true,
+        //     message: "you cant create ticket!",
+        //     numbers: new_numbers,
+        //     limit_data,
+        //     block_data,
+        //   }
+        // );
         return;
       }
     } else {
-      // res.send(
-      //   encoding({
-      //     success: false,
-      //     message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
-      //   })
-      // );
       res.send(
-        {
+        encoding({
           success: false,
           message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
-        }
+        })
       );
+      // res.send(
+      //   {
+      //     success: false,
+      //     message: `Haiti local time now: ${currentTime}. \n Time is up!. Sorry you cann't create ticket.`,
+      //   }
+      // );
       return;
     }
   } catch (err) {
@@ -931,9 +931,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
 
           // then check the BLTAmount ka percentage should be greater then the gameCategorryAmount+item.Amount 
-          if(LimitPercentArray.length >0){
+          if(LimitPercentArray.length >0){          if(LimitPercentArray.length>0){
            maxGameLimit = Math.floor((gameLimitPercent / 100) * totalBLTAmount)
-          }
           
         }
           //This is how much amount a person put using percentageLimit
@@ -1004,6 +1003,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           const totalSoldQuantitySubAdmin = await LimitCalc.aggregate([
             {
               $match: {
+                limitId: subAdminLimitId,
                 limitId: subAdminLimitId,
                 date: new Date(currentDate)
               },
@@ -1479,7 +1479,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
     return { success: true, block_data, limit_data, new_numbers };
   } catch (error) {
-    console.log("ticket check error: ", error);
+    // console.log("ticket check error: ", error);
     return { success: false, error: error };
   }
 }
