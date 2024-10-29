@@ -29,40 +29,40 @@ exports.signIn = async (req, res) => {
     const user = await User.findOne({ imei }).populate("subAdminId");
 
     if (!user) {
-      res.send(encoding({ success: false, message: "User not found!" }));
-      // res.send({ success: false, message: "User not found!" });
+      // res.send(encoding({ success: false, message: "User not found!" }));
+      res.send({ success: false, message: "User not found!" });
       return;
     }
 
     if (!user.isActive) {
-      res.send(encoding({ success: false, message: "This user locked now!" }));
-      // res.send({ success: false, message: "This user locked now!" });
+      // res.send(encoding({ success: false, message: "This user locked now!" }));
+      res.send({ success: false, message: "This user locked now!" });
       return;
     }
 
     if (!user.subAdminId.isActive) {
-      res.send(
-        encoding({
-          success: false,
-          message: "Votre compagnie est deconnecée",
-        })
-      );
-      // res.send({
+      // res.send(
+      //   encoding({
       //     success: false,
       //     message: "Votre compagnie est deconnecée",
-      //   }
+      //   })
       // );
+      res.send({
+          success: false,
+          message: "Votre compagnie est deconnecée",
+        }
+      );
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     
     if (!isMatch) {
-      res.send(
-        encoding({ success: false, message: "Mot de passe incorrecte" })
-      );
+      // res.send(
+      //   encoding({ success: false, message: "Mot de passe incorrecte" })
+      // );
 
-      // res.send({ success: false, message: "Mot de passe incorrecte" });
+      res.send({ success: false, message: "Mot de passe incorrecte" });
       return;
     }
 
@@ -1476,7 +1476,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
     return { success: true, block_data, limit_data, new_numbers };
   } catch (error) {
-    // console.log("ticket check error: ", error);
+    console.log("ticket check error: ", error);
     return { success: false, error: error };
   }
 }
