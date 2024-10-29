@@ -267,9 +267,9 @@ exports.getTicket = async (req, res) => {
     //   lotteryCategoryName: 1,
     // }
     );
-    res.send({ success: true, data: ticketsObj });
+    res.send(encoding({ success: true, data: ticketsObj }));
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.send(encoding({ message: err.message }));
   }
 };
 // Read  //tested
@@ -280,9 +280,9 @@ exports.getTicketNumbers = async (req, res) => {
       { _id: mongoose.Types.ObjectId(id) },
       { numbers: 1 }
     );
-    res.send({ success: true, data: ticketsObj.numbers });
+    res.send(encoding({ success: true, data: ticketsObj.numbers }));
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send(encoding({ message: err.message }));
   }
 };
 //get Win Ticket
@@ -373,7 +373,7 @@ exports.matchWinningNumbers = async (req, res) => {
     ]).exec((err, result) => {
       if (err) {
         // console.log(err);
-        res.send({ success: false, message: "not found!" });
+        res.send(encoding({ success: false, message: "not found!" }));
       } else {
         const winTicket = [];
         // Process the result
@@ -426,12 +426,12 @@ exports.matchWinningNumbers = async (req, res) => {
             });
           }
         });
-        res.send({ success: true, data: winTicket });
+        res.send(encoding({ success: true, data: winTicket }));
       }
     });
   } catch (err) {
     // console.log(err);
-    res.status(500).send(err);
+    res.status(500).send(encoding(err));
   }
 };
 // Read //tested half ,the part when number equal to wining number not tested
@@ -560,10 +560,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
     });
     
 
-    res.send({ success: true, data: { sum: sumAmount, paid: paidAmount } });
+    res.send(encoding({ success: true, data: { sum: sumAmount, paid: paidAmount } }));
   } catch (err) {
     // console.log(err);
-    res.status(500).send(err);
+    res.status(500).send(encoding(err));
   }
 };
 // Read   //tested half
@@ -583,7 +583,7 @@ exports.readWinningNumber = async (req, res) => {
     }
 
     if (winningNumber.length == 0) {
-      return res.send({ success: false, message: "Winning number not found" });
+      return res.send(encoding({ success: false, message: "Winning number not found" }));
     }
     //why this part 
 
@@ -609,10 +609,10 @@ exports.readWinningNumber = async (req, res) => {
       });
     });
 
-    res.send({ success: true, data: winningNumber});
+    res.send(encoding({ success: true, data: winningNumber}));
   } catch (err) {
     // console.log(err.message);
-    res.send({ success: false, message: "Server error" });
+    res.send(encoding({ success: false, message: "Server error" }));
   }
 };
 
@@ -638,18 +638,18 @@ exports.lotteryTimeCheck = async (req, res) => {
       });
       return;
     } else {
-      res.send({
+      res.send(encoding({
         success: true,
         data: false,
         time: currentTime,
         startTime: lotInfo.startTime,
         endTime: lotInfo.endTime,
-      });
+      }));
       return;
     }
   } catch (err) {
     // console.log("time check error: ", err);
-    res.send({ success: false, data: false });
+    res.send(encoding({ success: false, data: false }));
   }
 };
 
@@ -660,7 +660,7 @@ exports.deleteTicket = async (req, res) => {
       mongoose.Types.ObjectId(req.params.id)
     );
     if (ticket == null) {
-      return res.status(404).send({ message: "Ticket not found" });
+      return res.status(404).send(encoding({ message: "Ticket not found" }));
     }
 
     const lotInfo = await Lottery.findOne({
@@ -794,16 +794,16 @@ exports.deleteTicket = async (req, res) => {
 
       ticket.isDelete = true;
       await ticket.save();
-      return res.send({ success: true, message: "Ticket deleted" });
+      return res.send(encoding({ success: true, message: "Ticket deleted" }));
     } else {
-      return res.send({
+      return res.send(encoding({
         success: false,
         message: "Ticket time is up! You cann't remove this ticket!",
-      });
+      }));
     }
   } catch (err) {
     // console.log(err);
-    res.status(500).send({ message: err.message });
+    res.status(500).send(encoding({ message: err.message }));
   }
 };
 
@@ -1501,9 +1501,9 @@ exports.getDeletedTicket = async (req, res) => {
       ticketId: 1,
       lotteryCategoryName: 1,
     });
-    res.send({ success: true, data: ticketsObj });
+    res.send(encoding({ success: true, data: ticketsObj }));
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send(encoding({ message: err.message }));
   }
 };
 
@@ -1514,7 +1514,7 @@ exports.deleteTicketForever = async (req, res) => {
     return res.send({ success: true, message: "Ticket deleted" });
   } catch (err) {
     // console.log(err);
-    res.status(500).send({ message: err.message });
+    res.status(500).send(encoding({ message: err.message }));
   }
 };
 
@@ -1567,7 +1567,7 @@ exports.replayTicket = async (req, res) => {
       return;
     }
   } catch {
-    res.send({ success: false, data: false });
+    res.send(encoding({ success: false, data: false }));
   }
 };
 
@@ -1575,7 +1575,7 @@ exports.replayTicket = async (req, res) => {
 exports.isActive = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
-      res.status(500).send({ message: err });
+      res.status(500).send(encoding({ message: err }));
       return;
     }
     if (user && user.isActive === true) {
