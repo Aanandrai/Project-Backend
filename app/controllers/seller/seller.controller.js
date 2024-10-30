@@ -957,6 +957,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
          let subAdminLimitId=null
          let otherLimitId=null
          let remainingQuantitySubAdmin=item.amount
+         console.log("remainingQuantitySubAdmin",remainingQuantitySubAdmin)
+
         const alternateNumber = item.number.split("x").reverse().join("x");
         const subAdminLimit = await Limits.aggregate([
           {
@@ -991,8 +993,9 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
       
         // if subAdminLimit exist 
-        if(subAdminLimit ){
-          // console.log("subAdminLimitId",subAdminLimitId)
+        if(subAdminLimit.length>0){
+          console.log("subAdminLimit",subAdminLimit)
+          console.log("subAdminLimitId",subAdminLimitId)
           const soldQuantitySubAdmin=  await LimitCalc.findOne(
             {
               limitId: subAdminLimitId,
@@ -1035,14 +1038,15 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             ]);
             // console.log("totalSoldQuantitySubAdmin",totalSoldQuantitySubAdmin)
 
-          const totalSoldBySubAmin =totalSoldQuantitySubAdmin?.length > 0 ? totalSoldQuantitySubAdmin[0].totalSold : 0;
+          const totalSoldBySubAmin =totalSoldQuantitySubAdmin?.length > 0 ? totalSoldQuantitySubAdmin[0]?.totalSold : 0;
           remainingQuantitySubAdmin=subAdminLimit[0]?.limits.limitsButs-totalSoldBySubAmin 
-
-        }
+          }
+          
+        
 
 
           // finding seller or supervisor remaining amount and the actualAmount to put on a number 
-        const hasSuperVisorId = !!subAdminInfo?.superVisorId;
+        const hasSuperVisorId = !!subAdminInfo?.superViscleorId;
         let actualmaxAmountPriceBuy=0;
         let remainingQuantityOther=item.amount
 
@@ -1142,7 +1146,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           ]);
 
           otherLimitId=sellerLimit?._id
-          const remainingQuantityOther=maxAmountPriceBuy
+          remainingQuantityOther=maxAmountPriceBuy
           if(sellerLimit?.length>0){
 
             let soldQuantitySeller = await LimitCalc.findOne(
@@ -1198,7 +1202,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           }
           // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantitySeller )
         }
-        console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantityOther )
+        // console.log(maxAmountPriceBuy,remainingQuantitySubAdmin,remainingQuantityOther )
         actualmaxAmountPriceBuy =Math.min(maxAmountPriceBuy, remainingQuantitySubAdmin, remainingQuantityOther);
 
         // console.log(actualmaxAmountPriceBuy)
@@ -1306,8 +1310,9 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           if(actualmaxAmountPriceBuy==item.amount && actualmaxAmountPriceBuy>0){
             new_numbers.push({ ...item, amount: actualmaxAmountPriceBuy, bonus: false });
           }else{
-            if(actualmaxAmountPriceBuy>0)
+            if(actualmaxAmountPriceBuy>0){
             new_numbers.push({ ...item, amount: actualmaxAmountPriceBuy, bonus: false });
+            }
             limit_data.push({ ...item, availableAmount: actualmaxAmountPriceBuy });
           }
          
