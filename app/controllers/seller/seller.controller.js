@@ -1587,10 +1587,10 @@ exports.replayTicket = async (req, res) => {
 exports.isActive = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
-      res.status(500).send(encoding({ message: err }));
+      res.send(encoding({ message: err }));
       return;
     }
-    if (user && user.isActive === true) {
+    if (user && user?.isActive === true) {
       next();
       return;
     }
