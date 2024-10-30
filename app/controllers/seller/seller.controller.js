@@ -114,6 +114,7 @@ exports.signOut = async (req, res) => {
 //Create ticket //basic tested
 exports.newTicket = async (req, res) => {
   try {
+    console.log("request reaches to newTicket")
     const { lotteryCategoryName } = req.body;
     const sellerId=req.userId
     const numbers = JSON.parse(req.body.numbers);
