@@ -71,6 +71,7 @@ exports.signIn = async (req, res) => {
     });
 
     req.session.token = token;
+    console.log(token)
     res.send(
       encoding({
         success: true,
@@ -115,6 +116,7 @@ exports.newTicket = async (req, res) => {
   try {
     const { lotteryCategoryName } = req.body;
     const sellerId=req.userId
+    console.log("getting the request from app")
     const numbers = JSON.parse(req.body.numbers);
     // const numbers = req.body.numbers;
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
@@ -179,6 +181,7 @@ exports.newTicket = async (req, res) => {
             return;
           } else {
             const newId = savedTicket.ticketId;
+            console.log("new ticket is successfull")
             res.send(
               encoding({
                 success: true,
@@ -203,6 +206,7 @@ exports.newTicket = async (req, res) => {
           }
         });
       } else {
+        console.log("Can't read ticket")
         res.send(
           encoding({
             success: true,
@@ -224,6 +228,7 @@ exports.newTicket = async (req, res) => {
         return;
       }
     } else {
+      console.log("your timr is up for lottery")
       res.send(
         encoding({
           success: false,
@@ -239,8 +244,8 @@ exports.newTicket = async (req, res) => {
       return;
     }
   } catch (err) {
-    // console.log(err);
-    res.status(500).send(encoding({ message: err }));
+    console.log(err);
+    res.send(encoding({ message: err }));
     // res.status(500).send({ message: err });
   }
 };
