@@ -273,11 +273,13 @@ exports.getTicket = async (req, res) => {
       lotteryCategoryName: 1,
     }
     );
-    console.log(ticketsObj)
+    // console.log(ticketsObj)
     res.send({ success: true, data: ticketsObj });
+    // res.send(encoding({ success: true, data: ticketsObj }));
   } catch (err) {
     console.log(err)
-    res.send(encoding({ message: err.message }));
+    res.send({ message: err.message });
+    // res.send(encoding({ message: err.message }));
   }
 };
 // Read  //tested
@@ -288,9 +290,9 @@ exports.getTicketNumbers = async (req, res) => {
       { _id: mongoose.Types.ObjectId(id) },
       { numbers: 1 }
     );
-    res.send(encoding({ success: true, data: ticketsObj.numbers }));
+    res.send({ success: true, data: ticketsObj.numbers });
   } catch (err) {
-    res.status(500).send(encoding({ message: err.message }));
+    res.status(500).send({ message: err.message });
   }
 };
 //get Win Ticket
@@ -381,7 +383,7 @@ exports.matchWinningNumbers = async (req, res) => {
     ]).exec((err, result) => {
       if (err) {
         // console.log(err);
-        res.send(encoding({ success: false, message: "not found!" }));
+        res.send({ success: false, message: "not found!" });
       } else {
         const winTicket = [];
         // Process the result
@@ -434,12 +436,12 @@ exports.matchWinningNumbers = async (req, res) => {
             });
           }
         });
-        res.send(encoding({ success: true, data: winTicket }));
+        res.send({ success: true, data: winTicket });
       }
     });
   } catch (err) {
     // console.log(err);
-    res.status(500).send(encoding(err));
+    res.status(500).send(err);
   }
 };
 // Read //tested half ,the part when number equal to wining number not tested
@@ -569,10 +571,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
     });
     
     console.log(sumAmount,paidAmount)
-    res.send(encoding({ success: true, data: { sum: sumAmount, paid: paidAmount } }));
+    res.send({ success: true, data: { sum: sumAmount, paid: paidAmount } });
   } catch (err) {
     // console.log(err);
-    res.status(500).send(encoding(err));
+    res.status(500).send(err);
   }
 };
 // Read   //tested half
