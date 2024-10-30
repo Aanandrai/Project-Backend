@@ -274,7 +274,7 @@ exports.getTicket = async (req, res) => {
     }
     );
     console.log(ticketsObj)
-    res.send(encoding({ success: true, data: ticketsObj }));
+    res.send({ success: true, data: ticketsObj });
   } catch (err) {
     console.log(err)
     res.send(encoding({ message: err.message }));
