@@ -116,7 +116,6 @@ exports.newTicket = async (req, res) => {
   try {
     const { lotteryCategoryName } = req.body;
     const sellerId=req.userId
-    console.log("getting the request from app")
     const numbers = JSON.parse(req.body.numbers);
     // const numbers = req.body.numbers;
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
@@ -252,6 +251,7 @@ exports.newTicket = async (req, res) => {
 // Read //tested
 exports.getTicket = async (req, res) => {
   try {
+    console.log("request reches to getTicket server")
     let { fromDate, toDate, lotteryCategoryName } = req.query;
    
     seller = mongoose.Types.ObjectId(req.userId);
@@ -266,15 +266,17 @@ exports.getTicket = async (req, res) => {
       query.lotteryCategoryName = lotteryCategoryName;
     }
     const ticketsObj = await Ticket.find(query, 
-    //   {
-    //   _id: 1,
-    //   date: 1,
-    //   ticketId: 1,
-    //   lotteryCategoryName: 1,
-    // }
+      {
+      _id: 1,
+      date: 1,
+      ticketId: 1,
+      lotteryCategoryName: 1,
+    }
     );
+    console.log(ticketsObj)
     res.send(encoding({ success: true, data: ticketsObj }));
   } catch (err) {
+    console.log(err)
     res.send(encoding({ message: err.message }));
   }
 };
@@ -443,6 +445,7 @@ exports.matchWinningNumbers = async (req, res) => {
 // Read //tested half ,the part when number equal to wining number not tested
 exports.getSaleReportsForSeller = async (req, res) => {
   try {
+    console.log("request reches to server")
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     const lotteryCategoryName = req.query.lotteryCategoryName;
@@ -565,7 +568,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
       }
     });
     
-
+    console.log(sumAmount,paidAmount)
     res.send(encoding({ success: true, data: { sum: sumAmount, paid: paidAmount } }));
   } catch (err) {
     // console.log(err);
@@ -818,7 +821,6 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
     
     // Get seller detail and populate subAdmin field
     const subAdminInfo = await User.findOne({ _id: sellerId }).populate("subAdminId");
-    console.log(numbers)
     let superVisorId=subAdminInfo?.superVisorId ||""
     sellerId= mongoose.Types.ObjectId(sellerId)
 
