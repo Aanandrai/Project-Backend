@@ -813,14 +813,14 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
     
     // Get seller detail and populate subAdmin field
     const subAdminInfo = await User.findOne({ _id: sellerId }).populate("subAdminId");
-
+    console.log(numbers)
     let superVisorId=subAdminInfo?.superVisorId ||""
     sellerId= mongoose.Types.ObjectId(sellerId)
 
     const blockNumberQuery = {
       subAdmin: subAdminInfo.subAdminId,
       lotteryCategoryName,
-      $or: numbers.map((item) => ({
+      $or: numbers?.map((item) => ({
         gameCategory: item.gameCategory,
         number: item.number,
       })),
