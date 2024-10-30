@@ -115,8 +115,8 @@ exports.newTicket = async (req, res) => {
   try {
     const { lotteryCategoryName } = req.body;
     const sellerId=req.userId
-    // const numbers = JSON.parse(req.body.numbers);
-    const numbers = req.body.numbers;
+    const numbers = JSON.parse(req.body.numbers);
+    // const numbers = req.body.numbers;
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
     const currentTime = moment().tz(haitiTimezone).format("HH:mm");
 
