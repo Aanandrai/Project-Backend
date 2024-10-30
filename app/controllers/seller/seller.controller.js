@@ -181,6 +181,7 @@ exports.newTicket = async (req, res) => {
             return;
           } else {
             const newId = savedTicket.ticketId;
+            console.log(new_numbers)
             console.log("new ticket is successfull")
             res.send(
               encoding({
