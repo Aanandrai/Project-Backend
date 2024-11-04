@@ -1154,7 +1154,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           ]);
           console.log("sellerLimit",sellerLimit)
 
-          otherLimitId=sellerLimit?._id
+          otherLimitId=sellerLimit[0]?._id
           remainingQuantityOther=maxAmountPriceBuy
           if(sellerLimit?.length>0){
 
