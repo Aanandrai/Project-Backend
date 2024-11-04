@@ -1267,8 +1267,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 }],
               });
               await newLimit.save();
+              console.log("newLimitAdmin",newLimit)
             }
-            console.log("newLimitAdmin",newLimit)
 
           }
           
