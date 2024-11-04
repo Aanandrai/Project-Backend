@@ -1003,13 +1003,15 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
       
         // if subAdminLimit exist 
-        if(subAdminLimit.length>0){
+        if(subAdminLimit?.length>0){
+          console.log("Inside subAdminBlock")
           const soldQuantitySubAdmin=  await LimitCalc.findOne(
             {
               limitId: subAdminLimitId,
               date: new Date(currentDate),
             }
            );
+
             subAdminLimitsCalcId=soldQuantitySubAdmin?._id
 
 
@@ -1048,13 +1050,13 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
           const totalSoldBySubAmin =totalSoldQuantitySubAdmin?.length > 0 ? totalSoldQuantitySubAdmin[0]?.totalSold : 0;
           remainingQuantitySubAdmin=subAdminLimit[0]?.limits.limitsButs-totalSoldBySubAmin 
-          }
+        }
           
         
 
 
           // finding seller or supervisor remaining amount and the actualAmount to put on a number 
-        const hasSuperVisorId = !!subAdminInfo?.superViscleorId;
+        const hasSuperVisorId = !!subAdminInfo?.superVisorId;
         let actualmaxAmountPriceBuy=0;
         let remainingQuantityOther=item.amount
 
@@ -1155,6 +1157,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           console.log("sellerLimit",sellerLimit)
 
           otherLimitId=sellerLimit[0]?._id
+
+          
           remainingQuantityOther=maxAmountPriceBuy
           if(sellerLimit?.length>0){
 
@@ -1162,11 +1166,6 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               {
                 limitId: sellerLimit[0]._id,
                 date: new Date(currentDate),
-                "soldState.gameCategory": limitGameCategory,
-                "soldState.gameNumber": item.number,
-              },
-              {
-                "soldState.$": 1,
               }
              );
 
@@ -1274,7 +1273,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             }
 
           }
-          
+          console.log("otherLimitCalcId",otherLimitCalcId)
           if(otherLimitCalcId!=null){
             const updatedLimit=await LimitCalc.findOneAndUpdate(
               {
