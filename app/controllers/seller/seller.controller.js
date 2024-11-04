@@ -1237,6 +1237,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               },
               { new: true }
             );
+            console.log("updatedLimitAdmin",updatedLimit)
 
             if(!updatedLimit){
               const newEntry = {
@@ -1251,6 +1252,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 { $push: { soldState: newEntry } },
                 { new: true }
               );
+              console.log("upsertedLimitAdmin",upsertedLimit)
             }
           }else{
            
@@ -1266,6 +1268,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               });
               await newLimit.save();
             }
+            console.log("newLimitAdmin",newLimit)
 
           }
           
@@ -1283,6 +1286,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               },
               { new: true }
             );
+            console.log("updatedLimitOther",updatedLimit)
             if(!updatedLimit){
               const newEntry = {
                 gameCategory: limitGameCategory,
@@ -1296,6 +1300,9 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 { $push: { soldState: newEntry } },
                 { new: true }
               );
+              console.log("upsertedLimitOther",upsertedLimit)
+
+              
             }
           }else{
             if(otherLimitId){
@@ -1309,6 +1316,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 }],
               });
               await newLimit.save();
+              console.log("newLimitOther",newLimit)
             }
           }
 
