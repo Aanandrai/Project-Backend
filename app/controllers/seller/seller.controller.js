@@ -124,7 +124,7 @@ exports.newTicket = async (req, res) => {
 
 
     const lotInfo = await Lottery.findOne({ lotteryName: lotteryCategoryName });
-
+    console.log(latInfo)
     if (
       moment(currentTime, "HH:mm").isAfter(
         moment(lotInfo.startTime, "HH:mm")
