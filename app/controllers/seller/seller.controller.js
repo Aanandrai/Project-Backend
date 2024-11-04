@@ -1152,6 +1152,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             }
             
           ]);
+          console.log("sellerId",sellerId)
 
           otherLimitId=sellerLimit?._id
           remainingQuantityOther=maxAmountPriceBuy
@@ -1168,6 +1169,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
                 "soldState.$": 1,
               }
              );
+
+             console.log("soldQuantitySeller",soldQuantitySeller)
 
 
              otherLimitCalcId=soldQuantitySeller?._id
@@ -1305,6 +1308,8 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               
             }
           }else{
+            console.log("Hii")
+            console.log("otherLimitId",otherLimitId)
             if(otherLimitId){
               const newLimit = new LimitCalc({
                 limitId: otherLimitId,
