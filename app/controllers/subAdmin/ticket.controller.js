@@ -237,14 +237,14 @@ exports.deleteTicket = async (req, res) => {
     const currentTime = moment().tz(haitiTimezone).format("HH:mm");
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
 
-    const limitGameCategoryMapping = {
-      "L4C 1": "L4C",
-      "L4C 2": "L4C",
-      "L4C 3": "L4C",
-      "L5C 1": "L5C",
-      "L5C 2": "L5C",
-      "L5C 3": "L5C",
-    };
+    // const limitGameCategoryMapping = {
+    //   "L4C 1": "L4C",
+    //   "L4C 2": "L4C",
+    //   "L4C 3": "L4C",
+    //   "L5C 1": "L5C",
+    //   "L5C 2": "L5C",
+    //   "L5C 3": "L5C",
+    // };
 
     if (
       moment(new Date(today), "yyyy-MM-DD").isSame(
@@ -263,8 +263,7 @@ exports.deleteTicket = async (req, res) => {
       await Promise.all(
         numbers.map(async (item) => {
           if (!item.bonus) {
-            let limitGameCategory =
-              limitGameCategoryMapping[item.gameCategory] || item.gameCategory;
+            let limitGameCategory = item.gameCategory;
 
             const pipeline = [
               {
@@ -328,7 +327,7 @@ exports.deleteTicket = async (req, res) => {
 
             await LimitCalc.findOneAndUpdate(
               {
-                limitId: limit[0]._id,
+                limitId: limit[0]?._id,
                 "soldState.gameCategory": limitGameCategory,
                 "soldState.gameNumber": item.number,
               },

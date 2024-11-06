@@ -7,9 +7,9 @@ const bcrypt = require("bcryptjs");
 exports.addsuperVisor = async (req, res) => {
   try {
     // Validate required fields
-    if (!req.body.userName || !req.body.password || !req.body.companyName) {
+    if (!req.body.userName || !req.body.password ) {
       return res.status(400).send({
-        message: "Username, password, and company name are required.",
+        message: "Username, password",
       });
     }
 
