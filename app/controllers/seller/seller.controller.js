@@ -970,6 +970,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
          let remainingQuantitySubAdmin=item.amount
 
         const alternateNumber = item.number.split("x").reverse().join("x");
+        console.log("item.number",item.number)
         console.log("alternateNumber",alternateNumber)
         const subAdminLimit = await Limits.aggregate([
           {
