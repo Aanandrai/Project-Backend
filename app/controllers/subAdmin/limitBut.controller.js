@@ -94,12 +94,27 @@ exports.getLimitButAll = async (req, res) => {
 
 exports.getLimitButSeller = async (req, res) => {
   try {
+    const sellerId=req.query.seller
+    const lotteryCategoryName=req.query.lotteryCategoryName
+    // console.log(sellerId)
     let limits = null;
-    limits = await LimitBut.find({
-      subAdmin: req.userId,
-      superVisor: { $exists: false },
-      seller:{$exists:true} // Ensure superVisor does not exist
-    }).populate("seller");
+
+    matchStage={
+      subAdmin:req.userId,
+      superVisor:{ $exists: false }
+    }
+
+    if(sellerId){
+      matchStage.seller=mongoose.Types.ObjectId(sellerId)
+    }else{
+      matchStage.seller={ $exists: true } 
+    }
+
+    if(lotteryCategoryName){
+      matchStage.lotteryCategoryName=lotteryCategoryName
+    }
+    // console.log(matchStage)
+    limits = await LimitBut.find(matchStage).populate("seller");
 
     res.json(limits);
   } catch (err) {
@@ -110,12 +125,27 @@ exports.getLimitButSeller = async (req, res) => {
 
 exports.getLimitButSuperVisor = async (req, res) => {
   try {
+    const superVisorId=req.query.superVisor
+    const lotteryCategoryName=req.query.lotteryCategoryName
+
+    matchStage={
+      subAdmin:req.userId,
+      seller:{ $exists: false }
+    }
+
+    if(superVisorId){
+      matchStage.superVisor=mongoose.Types.ObjectId(superVisorId)
+    }else{
+      matchStage.superVisor={ $exists: true } 
+    }
+
+    if(lotteryCategoryName){
+      matchStage.lotteryCategoryName=lotteryCategoryName
+    }
+
+
     let limits = null;
-    limits = await LimitBut.find({
-      subAdmin: req.userId,
-      superVisor:{$exists:true},
-      seller: { $exists: false } // Ensure seller does not exist
-    }).populate("superVisor");
+    limits = await LimitBut.find(matchStage).populate("superVisor");
 
     res.json(limits);
   } catch (err) {
