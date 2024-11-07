@@ -1048,7 +1048,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             },
             ]);
             // console.log("totalSoldQuantitySubAdmin",totalSoldQuantitySubAdmin)
-            console.log("totalSoldBySubAmin",totalSoldBySubAmin)
+            console.log("soldQuantitySubAdmin",soldQuantitySubAdmin)
           const totalSoldBySubAmin =totalSoldQuantitySubAdmin?.length > 0 ? totalSoldQuantitySubAdmin[0]?.totalSold : 0;
           remainingQuantitySubAdmin=subAdminLimit[0]?.limits.limitsButs-totalSoldBySubAmin 
         }
