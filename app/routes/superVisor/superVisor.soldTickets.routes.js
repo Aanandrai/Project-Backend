@@ -10,11 +10,11 @@ module.exports = function (app) {
   // Add Sub Admin
 
   // Read Sub Admin
-  app.get(
-    "/api/superVisor/getseller",
-    [authJwt.verifyToken, authJwt.isSuperVisor],
-    controller.getseller
-  );
+  // app.get(
+  //   "/api/superVisor/getseller",
+  //   [authJwt.verifyToken, authJwt.isSuperVisor],
+  //   controller.getseller
+  // );
 
   // Read all
   app.get(

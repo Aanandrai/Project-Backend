@@ -1,41 +1,43 @@
 const db = require("../../models");
 const User = db.user;
+const Ticket = db.ticket;
+const mongoose = require("mongoose");
 
 var bcrypt = require("bcryptjs");
 
 // Read
-exports.getseller = async (req, res) => {
-  try {
-    // Fetch sellers and populate the supervisor's name
-    const users = await User.find({ subAdminId: req.userId, role: "seller" })
-      .populate("superVisorId", "userName") // Populate supervisor's userName field
-      .exec();
+// exports.getseller = async (req, res) => {
+//   try {
+//     // Fetch sellers and populate the supervisor's name
+//     const users = await User.find({ subAdminId: req.userId, role: "seller" })
+//       .populate("superVisorId", "userName") // Populate supervisor's userName field
+//       .exec();
 
-    // Fetch sub-admin details (companyName, bonusFlag)
-    const subadmin = await User.findOne(
-      { _id: req.userId },
-      { companyName: 1, bonusFlag: 1 }
-    );
+//     // Fetch sub-admin details (companyName, bonusFlag)
+//     const subadmin = await User.findOne(
+//       { _id: req.userId },
+//       { companyName: 1, bonusFlag: 1 }
+//     );
 
-    res.send({
-      success: true,
-      users: users.map((user) => ({
-        _id: user._id,
-        userName: user.userName,
-        superVisorId: user.superVisorId?._id || null, // Ensure superVisorId is present
-        superVisorName: user.superVisorId?.userName || "N/A", // Display supervisor's name, fallback to N/A
-        isActive: user.isActive,
-        imei: user.imei,
-      })),
-      companyName: subadmin?.companyName,
-      bonusFlag: subadmin?.bonusFlag,
-    });
-  } catch (err) {
-    res
-      .status(500)
-      .send({ message: "Internal Server Error", error: err.message });
-  }
-};
+//     res.send({
+//       success: true,
+//       users: users.map((user) => ({
+//         _id: user._id,
+//         userName: user.userName,
+//         superVisorId: user.superVisorId?._id || null, // Ensure superVisorId is present
+//         superVisorName: user.superVisorId?.userName || "N/A", // Display supervisor's name, fallback to N/A
+//         isActive: user.isActive,
+//         imei: user.imei,
+//       })),
+//       companyName: subadmin?.companyName,
+//       bonusFlag: subadmin?.bonusFlag,
+//     });
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .send({ message: "Internal Server Error", error: err.message });
+//   }
+// };
 
 //get tickets
 exports.getTicket = async (req, res) => {
