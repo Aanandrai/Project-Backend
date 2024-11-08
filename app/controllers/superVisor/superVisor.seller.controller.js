@@ -1,5 +1,6 @@
 const db = require("../../models");
 const User = db.user;
+const mongoose = require("mongoose");
 
 var bcrypt = require("bcryptjs");
 
@@ -24,16 +25,24 @@ var bcrypt = require("bcryptjs");
 exports.getseller = async (req, res) => {
   try {
     // Fetch sellers and populate the supervisor's name
-    const users= await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId").populate("subAdminId")
+    const users= await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId")
     // const users = await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId");
     // console.log(users)
+    const subAdminId=mongoose.Types.ObjectId(users[0]?.subAdminId)
+
+    let subAdmin={}
+    if(subAdminId){
+      subAdmin=await User.findById(subAdminId)
+    }
 
  
     // Fetch sub-admin details (companyName, bonusFlag)
     const superVisor = await User.findOne(
       { _id: req.userId }
     );
+    // console.log(users)
    
+    console.log(subAdmin.companyName)
 
     res.send({
       success: true,
@@ -45,7 +54,7 @@ exports.getseller = async (req, res) => {
         isActive: user.isActive,
         imei: user.imei,
       })),
-      companyName: users.subAdminId?.companyName,
+      companyName:subAdmin?.companyName,
       bonusFlag: superVisor?.bonusFlag,
     });
   } catch (err) {
