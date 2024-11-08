@@ -42,7 +42,7 @@ exports.getseller = async (req, res) => {
     );
     // console.log(users)
    
-    console.log(subAdmin.companyName)
+    // console.log(subAdmin.companyName)
 
     res.send({
       success: true,
