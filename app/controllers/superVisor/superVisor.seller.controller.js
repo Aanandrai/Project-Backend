@@ -26,7 +26,7 @@ exports.getseller = async (req, res) => {
     // Fetch sellers and populate the supervisor's name
     const users= await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId").populate("subAdminId")
     // const users = await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId");
-    // console.log(users)
+    console.log(users)
 
  
     // Fetch sub-admin details (companyName, bonusFlag)
@@ -45,7 +45,7 @@ exports.getseller = async (req, res) => {
         isActive: user.isActive,
         imei: user.imei,
       })),
-      companyName: subAdminId?.companyName,
+      companyName: users.subAdminId?.companyName,
       bonusFlag: superVisor?.bonusFlag,
     });
   } catch (err) {
