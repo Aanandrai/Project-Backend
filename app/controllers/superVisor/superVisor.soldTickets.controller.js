@@ -46,8 +46,8 @@ exports.getTicket = async (req, res) => {
     const query = { isDelete: false };
     query.date = { $gte: fromDate, $lte: toDate };
 
-    if (seller == "") {
-      const sellers = await User.find({ subAdminId: req.userId }, { _id: 1 });
+    if (!seller) {
+      const sellers = await User.find({ superVisorId: req.userId }, { _id: 1 });
       let sellerIds = [];
       sellers.map((item) => {
         sellerIds.push(item._id);
@@ -60,6 +60,9 @@ exports.getTicket = async (req, res) => {
     if (lotteryCategoryName != "") {
       query.lotteryCategoryName = lotteryCategoryName;
     }
+
+
+
     const ticketsObj = await Ticket.find(query).sort({
       lotteryCategoryName: 1,
       date: 1,
