@@ -24,8 +24,9 @@ var bcrypt = require("bcryptjs");
 exports.getseller = async (req, res) => {
   try {
     // Fetch sellers and populate the supervisor's name
-    const users= await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId")
+    const users= await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId").populate("subAdminId")
     // const users = await User.find({ superVisorId: req.userId, role: "seller" }).populate("superVisorId");
+    console.log(users)
 
  
     // Fetch sub-admin details (companyName, bonusFlag)
@@ -44,7 +45,7 @@ exports.getseller = async (req, res) => {
         isActive: user.isActive,
         imei: user.imei,
       })),
-      companyName: superVisor?.companyName,
+      companyName: subAdminId?.companyName,
       bonusFlag: superVisor?.bonusFlag,
     });
   } catch (err) {
