@@ -6,11 +6,24 @@ const paymentTermSchema = new mongoose.Schema(
     subAdmin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     // The name of the lottery category for which the payment term applies
     lotteryCategoryName: {
-      type: String,
-      required: true,
+      type: String
+    },
+    superVisor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    seller: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    date: {
+      type: Date,
+      required: true
     },
     // An array of objects that specify the payment terms for each game category
     conditions: {

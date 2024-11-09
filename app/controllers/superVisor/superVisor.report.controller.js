@@ -158,7 +158,7 @@ exports.getSaleReports = async (req, res) => {
   }
 };
 
-// get sell details
+// get sell details  It is correct issue is with lotteryCategory Name spacing
 exports.getSellDetails = async (req, res) => {
   try {
     const { fromDate, lotteryCategoryName, seller } = req.query;
@@ -174,11 +174,12 @@ exports.getSellDetails = async (req, res) => {
       query.lotteryCategoryName = lotteryCategoryName;
     }
 
-    if (seller == "") {
+    if (!seller) {
       const sellers = await User.find(
         { superVisorId: superVisorId },
         { _id: 1 }
       );
+   
       sellers.map((item) => {
         sellerIds.push(item._id);
       });
@@ -186,8 +187,9 @@ exports.getSellDetails = async (req, res) => {
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
     }
-
     query.seller = seller_query;
+    // console.log(query)
+    // console.log("HII")
 
     Ticket.aggregate([
       {
@@ -227,6 +229,7 @@ exports.getSellDetails = async (req, res) => {
       },
     ])
       .then((result) => {
+        // console.log(result)
         res.send({ success: true, data: result });
       })
       .catch((error) => {
@@ -260,7 +263,7 @@ exports.getSellDetailsByGameCategory = async (req, res) => {
 
     if (seller == "") {
       const sellers = await User.find({ subAdminId: subAdminId });
-      console.log(sellers)
+      // console.log(sellers)
       sellers.map((item) => {
         sellerIds.push(item._id);
       });
@@ -270,7 +273,7 @@ exports.getSellDetailsByGameCategory = async (req, res) => {
     }
 
     query.seller = seller_query;
-   console.log(query)
+  //  console.log(query)
 
     Ticket.aggregate([
       {
@@ -323,6 +326,7 @@ exports.getSellDetailsByGameCategory = async (req, res) => {
 //get sell details all lotteryCategory
 exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
   try {
+    // console.log("hii")
     const fromDate = req.query.fromDate;
     const seller = req.query.seller;
     const subAdminId = mongoose.Types.ObjectId(req.userId);
@@ -330,6 +334,8 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
     const query = [];
     query.push({ $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] });
     query.push({ $eq: ["$date", "$$date"] });
+
+   
 
     let seller_query = null;
     let sellerIds = [];
@@ -340,6 +346,7 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
     }
+   
 
     const matchStage = {
       $match: {

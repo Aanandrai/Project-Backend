@@ -1,39 +1,82 @@
 const db = require("../../models");
+const mongoose = require("mongoose");
 const PaymentTerm = db.paymentTerm;
+const moment = require("moment-timezone");
+const haitiTimezone = "America/Port-au-Prince";
 
 // Create //tested
 exports.addPaymentTerm = async (req, res) => {
   try {
-    const { lotteryCategoryName, conditions } = req.body;
+    const { lotteryCategoryName, conditions ,seller ,superVisor} = req.body;
     subAdmin = req.userId;
 
-    const paymentTermsCheck = await PaymentTerm.find({
-      subAdmin: subAdmin,
-      lotteryCategoryName: lotteryCategoryName
-    });
+    if(conditions.length==0){
+      res.status(400).send({message:"conditions can not de empty array"})
+    }
 
-    if(paymentTermsCheck.length != 0) {
+    const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
+    
+      
+    let check={
+      subAdmin:subAdmin,
+      date:today
+    }
+
+    if(lotteryCategoryName){
+      check.lotteryCategoryName=lotteryCategoryName
+    }else{
+      check.lotteryCategoryName={$exists:false}
+    }
+
+    if(seller){
+      check.seller=mongoose.Types.ObjectId(seller)
+    }else if(superVisor){
+      check.superVisor=mongoose.Types.ObjectId(superVisor)
+    }else{
+      check.seller={$exists:false}
+      check.superVisor={$exists:false}
+    }
+
+    const paymentTermsCheck = await PaymentTerm.findOne(check);
+    console.log(paymentTermsCheck)
+
+    if(paymentTermsCheck) {
       res.status(400).send({message: "Already exist by LotteryCategoryName! You have to update"});
       return;
     }
 
-    const paymentTerm = new PaymentTerm({
-      subAdmin: subAdmin,
-      lotteryCategoryName: lotteryCategoryName,
-      conditions: conditions
-    });
+    
+    const paymentTermData = {
+      subAdmin,
+      conditions,
+      date: today,
+    };
+    
+    if (lotteryCategoryName) {
+      paymentTermData.lotteryCategoryName = lotteryCategoryName;
+    }
+    
+    if (seller) {
+      paymentTermData.seller = seller;
+    }else if (superVisor) {
+      paymentTermData.superVisor = superVisor;
+    }
+    
+    const paymentTerm = new PaymentTerm(paymentTermData);
    
     await paymentTerm.save();
     res.send(paymentTerm);
   } catch (error) {
+    console.log(error)
     res.status(400).send(error);
   }
 };
 
 
 // Read //tested
-exports.readPaymentTermBySubAdminId = async (req, res) => {
+exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
   try {
+    const lotteryCategoryName=req.query.lotteryCategoryName
     const paymentTerms = await PaymentTerm.find({
       subAdmin: req.userId,
     });

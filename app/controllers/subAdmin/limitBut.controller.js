@@ -49,6 +49,8 @@ exports.addLimitBut = async (req, res) => {
         const isExist = await LimitBut.findOne({
           subAdmin: req.userId,
           lotteryCategoryName,
+          seller:{$exists:false},
+          superVisor:{$exists:false}
         });
 
         if (isExist) {
