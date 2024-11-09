@@ -12,6 +12,7 @@ exports.addPaymentTerm = async (req, res) => {
 
     if(conditions.length==0){
       res.status(400).send({message:"conditions can not de empty array"})
+      return;
     }
 
     const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
@@ -38,7 +39,6 @@ exports.addPaymentTerm = async (req, res) => {
     }
 
     const paymentTermsCheck = await PaymentTerm.findOne(check);
-    console.log(paymentTermsCheck)
 
     if(paymentTermsCheck) {
       res.status(400).send({message: "Already exist by LotteryCategoryName! You have to update"});
@@ -86,6 +86,7 @@ exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
     });
     res.send(paymentTerms);
   } catch (error) {
+    console.log(error)
     res.status(500).send(error);
   }
 };
@@ -150,6 +151,19 @@ exports.readPaymentTermOfSeller = async (req, res) => {
 // Update //tested
 exports.updatePaymentTerm = async (req, res) => {
   try {
+
+    const tempPaymentTerm=await PaymentTerm.findById(req.params.id)
+    if(!tempPaymentTerm){
+      res.status(400).send({message:"PaymentTerm not found"})
+      return;
+    }
+
+    if(tempPaymentTerm.date!=moment().tz(haitiTimezone).format("yyyy-MM-DD")){
+      res.status(400).send({message:"You can not update past date"})
+      return;
+    }
+
+
     const paymentTerm = await PaymentTerm.findByIdAndUpdate(
       req.params.id,
       req.body,
