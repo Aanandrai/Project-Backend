@@ -14,11 +14,23 @@ module.exports = function (app) {
     controller.addPaymentTerm
   );
 
-  // Read all
+  // Read all of All 
   app.get(
-    "/api/subadmin/getpaymentterm",
+    "/api/subadmin/getpaymenttermAll",
     [authJwt.verifyToken, authJwt.isSubAdmin],
-    controller.readPaymentTermBySubAdminId
+    controller.readPaymentTermBySubAdminIdAll
+  );
+
+  app.get(
+    "/api/subadmin/getpaymenttermSuperVisor",
+    [authJwt.verifyToken, authJwt.isSubAdmin],
+    controller.readPaymentTermOfSuperVisor
+  );
+
+  app.get(
+    "/api/subadmin/getpaymenttermSeller",
+    [authJwt.verifyToken, authJwt.isSubAdmin],
+    controller.readPaymentTermOfSeller
   );
 
   // Update

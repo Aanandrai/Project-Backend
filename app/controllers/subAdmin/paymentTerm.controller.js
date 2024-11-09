@@ -76,15 +76,76 @@ exports.addPaymentTerm = async (req, res) => {
 // Read //tested
 exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
   try {
-    const lotteryCategoryName=req.query.lotteryCategoryName
+    const fromDate=req.query.fromDate
+
     const paymentTerms = await PaymentTerm.find({
       subAdmin: req.userId,
+      superVisor: { $exists: false }, // Ensure superVisor does not exist
+      seller: { $exists: false },// Ensure seller does not exist
+      date: new Date(fromDate)
     });
     res.send(paymentTerms);
   } catch (error) {
     res.status(500).send(error);
   }
 };
+
+
+
+exports.readPaymentTermOfSuperVisor = async (req, res) => {
+  try {
+    const fromDate=req.query.fromDate
+    const lotteryCategoryName=req.query.lotteryCategoryName
+    const superVisor=req.query.superVisor
+
+
+    let check={
+      subAdmin:req.userId,
+      date:new Date(fromDate),
+      superVisor:mongoose.Types.ObjectId(superVisor),
+      seller: { $exists: false }
+    }
+
+    if(lotteryCategoryName){
+      check.lotteryCategoryName=lotteryCategoryName
+    }
+
+
+    const paymentTerms = await PaymentTerm.find(check);
+    res.send(paymentTerms);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+
+exports.readPaymentTermOfSeller = async (req, res) => {
+  try {
+    const fromDate=req.query.fromDate
+    const lotteryCategoryName=req.query.lotteryCategoryName
+    const seller=req.query.seller
+   
+
+
+    let check={
+      subAdmin:req.userId,
+      date:new Date(fromDate),
+      superVisor:{ $exists: false },
+      seller: mongoose.Types.ObjectId(seller)
+    }
+
+    if(lotteryCategoryName){
+      check.lotteryCategoryName=lotteryCategoryName
+    }
+
+
+    const paymentTerms = await PaymentTerm.find(check);
+    res.send(paymentTerms);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 
 // Update //tested
 exports.updatePaymentTerm = async (req, res) => {
