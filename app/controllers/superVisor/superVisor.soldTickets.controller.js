@@ -69,6 +69,7 @@ exports.getTicket = async (req, res) => {
     });
     res.send({ success: true, data: ticketsObj });
   } catch (err) {
+    console.log(err)
     res.status(500).send({ message: err.message });
   }
 };

@@ -83,7 +83,7 @@ exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
       superVisor: { $exists: false }, // Ensure superVisor does not exist
       seller: { $exists: false },// Ensure seller does not exist
       date: new Date(fromDate)
-    });
+    }).populate("subAdmin")
     res.send(paymentTerms);
   } catch (error) {
     console.log(error)
@@ -99,6 +99,11 @@ exports.readPaymentTermOfSuperVisor = async (req, res) => {
     const lotteryCategoryName=req.query.lotteryCategoryName
     const superVisor=req.query.superVisor
 
+    if(!superVisor){  
+      res.status(400).send({message:"SuperVisor is required"})
+      return  
+    }
+
 
     let check={
       subAdmin:req.userId,
@@ -112,7 +117,7 @@ exports.readPaymentTermOfSuperVisor = async (req, res) => {
     }
 
 
-    const paymentTerms = await PaymentTerm.find(check);
+    const paymentTerms = await PaymentTerm.find(check).populate(superVisor);
     res.send(paymentTerms);
   } catch (error) {
     res.status(500).send(error);
@@ -126,6 +131,10 @@ exports.readPaymentTermOfSeller = async (req, res) => {
     const lotteryCategoryName=req.query.lotteryCategoryName
     const seller=req.query.seller
    
+    if(!seller){
+      res.status(400).send({message:"Seller is required"})
+      return  
+    }
 
 
     let check={
@@ -140,7 +149,7 @@ exports.readPaymentTermOfSeller = async (req, res) => {
     }
 
 
-    const paymentTerms = await PaymentTerm.find(check);
+    const paymentTerms = await PaymentTerm.find(check).populate(seller);
     res.send(paymentTerms);
   } catch (error) {
     res.status(500).send(error);

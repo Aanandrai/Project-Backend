@@ -312,7 +312,7 @@ exports.getSellDetailsByGameCategory = async (req, res) => {
   }
 };
 
-//get sell details all lotteryCategory
+//get sell details all lotteryCategory       have to make changes as we have change payment terms
 exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
   try {
     const fromDate = req.query.fromDate;
@@ -459,24 +459,24 @@ exports.getSellGameNumberInfo = async (req, res) => {
     let sellerIds = [];
     let limitInfo = null;
 
-    let limitGameCategory = null;
+    let limitGameCategory = gameCategory
 
-    if (
-      gameCategory == "L4C 1" ||
-      gameCategory == "L4C 2" ||
-      gameCategory == "L4C 3"
-    ) {
-      limitGameCategory = "L4C";
-    } else if (
-      gameCategory == "L5C 1" ||
-      gameCategory == "L5C 2" ||
-      gameCategory == "L5C 3"
-    ) {
-      limitGameCategory = "L5C";
-    } else {
-      limitGameCategory = gameCategory;
-    }
-
+    // if (
+    //   gameCategory == "L4C 1" ||
+    //   gameCategory == "L4C 2" ||
+    //   gameCategory == "L4C 3"
+    // ) {
+    //   limitGameCategory = "L4C";
+    // } else if (
+    //   gameCategory == "L5C 1" ||
+    //   gameCategory == "L5C 2" ||
+    //   gameCategory == "L5C 3"
+    // ) {
+    //   limitGameCategory = "L5C";
+    // } else {
+    //   limitGameCategory = gameCategory;
+    // }
+    
     if (seller == "") {
       const sellers = await User.find({ subAdminId: subAdminId }, { _id: 1 });
       sellerIds = sellers.map((item) => item._id);
