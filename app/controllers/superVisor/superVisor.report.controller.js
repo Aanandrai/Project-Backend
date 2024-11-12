@@ -331,6 +331,8 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
     const fromDate = req.query.fromDate;
     const seller = req.query.seller;
     const subVisorId= mongoose.Types.ObjectId(req.userId);
+    const subAdminId=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
+    console.log(subAdminId)
 
     const query = [];
     query.push({ $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] });
