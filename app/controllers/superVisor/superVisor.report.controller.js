@@ -12,7 +12,8 @@ exports.getSaleReports = async (req, res) => {
     const seller = req.query.seller;
     const superVisorId = mongoose.Types.ObjectId(req.userId);
 
-    const subAdminId=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
+    const subAdmin=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
+    const subAdminId=subAdmin.subAdminId
     console.log(subAdminId)
 
     const query = [];
@@ -330,9 +331,10 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
     // console.log("hii")
     const fromDate = req.query.fromDate;
     const seller = req.query.seller;
-    const subVisorId= mongoose.Types.ObjectId(req.userId);
-    const subAdminId=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
-    console.log(subAdminId)
+    const superVisorId= mongoose.Types.ObjectId(req.userId);
+    const subAdmin=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
+    const subAdminId=subAdmin.subAdminId
+ 
 
     const query = [];
     query.push({ $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] });
@@ -343,7 +345,8 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
     let seller_query = null;
     let sellerIds = [];
     if (seller == "") {
-      const sellers = await User.find({ superVisorId: subVisorId }, { _id: 1 });
+      const sellers = await User.find({ superVisorId: superVisorId }, { _id: 1 });
+      sellerIds = sellers.map((item) => item._id);
       seller_query = { $in: sellerIds };
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
