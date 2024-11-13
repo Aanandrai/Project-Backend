@@ -3,6 +3,7 @@ const db = require("../../models");
 const Ticket = db.ticket;
 const User = db.user;
 const Limit = db.limits;
+const paymentTerm = db.paymentTerm;
 
 exports.getSaleReports = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ exports.getSaleReports = async (req, res) => {
 
     const subAdmin=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
     const subAdminId=subAdmin.subAdminId
-    console.log(subAdminId)
+    // console.log(subAdminId)
 
     const query = [];
     query.push({ $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] });
@@ -43,30 +44,155 @@ exports.getSaleReports = async (req, res) => {
       matchStage.$match.lotteryCategoryName = lotteryCategoryName;
     }
 
+    // const tick=await paymentTerm.findOne({superVisor:superVisorId})
+    // // console.log(tick)
+
     const result = await Ticket.aggregate([
       matchStage,
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo",
+      },
       {
         $lookup: {
           from: "paymentterms",
           let: {
             lotteryCategoryName: "$lotteryCategoryName",
+            seller: "$seller",
+            superVisor: "$sellerInfo.superVisorId",
             subAdmin: "$subAdmin",
+            date: "$date",
           },
           pipeline: [
             {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
-                    { $eq: ["$subAdmin", subAdminId] },
-                  ],
-                },
+              $facet: {
+                priority1: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority2: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority3: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority4: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority5: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority6: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin",subAdminId ] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
+            {
+              $project: {
+                // Get the first non-null and non-undefined payment term
+                paymentTerms: {
+                  $let: {
+                    vars: {
+                      priorities: [
+                        { $arrayElemAt: ["$priority1", 0] },
+                        { $arrayElemAt: ["$priority2", 0] },
+                        { $arrayElemAt: ["$priority3", 0] },
+                        { $arrayElemAt: ["$priority4", 0] },
+                        { $arrayElemAt: ["$priority5", 0] },
+                        { $arrayElemAt: ["$priority6", 0] }
+                      ]
+                    },
+                    in: {
+                      $first: {
+                        $filter: {
+                          input: "$$priorities",
+                          as: "priority",
+                          cond: { $ne: ["$$priority", null] }  // Only pick non-null priorities
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           ],
           as: "paymentTerms",
         },
-      },
+      },      
       {
         $lookup: {
           from: "winningnumbers",
@@ -84,63 +210,75 @@ exports.getSaleReports = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "users",
-          localField: "seller",
-          foreignField: "_id",
-          as: "sellerInfo",
-        },
-      },
-      {
         $project: {
-          seller: {
-            $arrayElemAt: ["$sellerInfo.userName", 0],
-          },
+          seller: "$sellerInfo.userName",
+          supervisor: "$sellerInfo.supervisor",
           ticketId: 1,
           date: 1,
           lotteryCategoryName: 1,
           numbers: 1,
           winningNumbers: 1,
-          paymentTerms: 1,
+          paymentTerms: { $arrayElemAt: ["$paymentTerms", 0] },
         },
       },
     ]);
 
     const resultBySeller = {};
+    // console.log(result)
 
-    result.forEach((item) => {
+    if(result.length==0){
+      res.send({ success: true, data: resultBySeller });
+      return
+    }
+
+    result?.forEach((item) => {
       const sellerName = item.seller;
       const numbers = item.numbers;
+      // console.log("number",numbers)
 
       let sumAmount = 0;
       let paidAmount = 0;
 
       // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
 
-      if (item.winningNumbers.length !== 0 && item.paymentTerms.length !== 0) {
-        const winnumbers = item.winningNumbers[0].numbers;
-        const payterms = item.paymentTerms[0].conditions;
-        numbers.forEach((gameNumber) => {
-          winnumbers.forEach((winNumber) => {
-            if (
-              gameNumber.number === winNumber.number &&
-              gameNumber.gameCategory === winNumber.gameCategory
-            ) {
-              payterms.forEach((term) => {
+      if (Array.isArray(item?.winningNumbers) &&
+        item?.winningNumbers?.length !== 0 && 
+        Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
+        item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
+        
+        
+        const winnumbers = item.winningNumbers[0]?.numbers;
+        // console.log(item.paymentTerms)
+        // console.log(item)
+        const payterms = item.paymentTerms?.paymentTerms?.conditions;
+        // console.log(payterms)
+
+        // here we have to give warning if payment terms are not set
+        if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
+          numbers.forEach((gameNumber) => {
+            if (Array.isArray(winnumbers) && winnumbers.length > 0) {
+              winnumbers.forEach((winNumber) => {
                 if (
-                  term.gameCategory === winNumber.gameCategory &&
-                  winNumber.position === term.position
+                  gameNumber.number === winNumber.number &&
+                  gameNumber.gameCategory === winNumber.gameCategory
                 ) {
-                  paidAmount += gameNumber.amount * term.condition;
+                  payterms.forEach((term) => {
+                    if (
+                      term.gameCategory === winNumber.gameCategory &&
+                      winNumber.position === term.position
+                    ) {
+                      paidAmount += gameNumber.amount * term.condition;
+                    }
+                  });
                 }
               });
             }
-          });
 
-          if (!gameNumber.bonus) {
-            sumAmount += gameNumber.amount;
-          }
-        });
+            if (!gameNumber.bonus) {
+              sumAmount += gameNumber.amount;
+            }
+          });
+        }
       }
 
       if (!resultBySeller[sellerName]) {
@@ -479,23 +617,24 @@ exports.getSellGameNumberInfo = async (req, res) => {
     let sellerIds = [];
     let limitInfo = null;
 
-    let limitGameCategory = null;
+    let limitGameCategory = gameCategory;
 
-    if (
-      gameCategory == "L4C 1" ||
-      gameCategory == "L4C 2" ||
-      gameCategory == "L4C 3"
-    ) {
-      limitGameCategory = "L4C";
-    } else if (
-      gameCategory == "L5C 1" ||
-      gameCategory == "L5C 2" ||
-      gameCategory == "L5C 3"
-    ) {
-      limitGameCategory = "L5C";
-    } else {
-      limitGameCategory = gameCategory;
-    }
+    // if (
+    //   gameCategory == "L4C 1" ||
+    //   gameCategory == "L4C 2" ||
+    //   gameCategory == "L4C 3"
+    // ) {
+    //   limitGameCategory = "L4C";
+    // } else if (
+    //   gameCategory == "L5C 1" ||
+    //   gameCategory == "L5C 2" ||
+    //   gameCategory == "L5C 3"
+    // ) {
+    //   limitGameCategory = "L5C";
+    // } else {
+    //   limitGameCategory = gameCategory;
+    // }
+
 
     if (seller == "") {
       const sellers = await User.find({ subAdminId: subAdminId }, { _id: 1 });
