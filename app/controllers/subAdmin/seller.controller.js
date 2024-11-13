@@ -106,12 +106,16 @@ exports.updateseller = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(404).send();
+      res.status(404).send({message:"User not found"});
     }
     updates.forEach((update) => {
+    
       if (`${req.body[update]}` != "") {
         // only update if the field exists in the req.body object
         user[update] = req.body[update];
+      }
+      else if(update == "superVisorId"){
+        user.superVisorId =undefined;
       }
     });
     if (req.body.password) {
