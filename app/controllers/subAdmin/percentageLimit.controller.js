@@ -66,3 +66,13 @@ exports.getPercentageLimit=async(req,res)=>{
         res.status(500).json(err)
     }
 }
+
+// Delete
+exports.deletePercentageLimit = async (req, res) => {
+  try {
+    const percentagelimit = await LimitPercentage.findByIdAndDelete(req.params.id);
+    res.send(percentagelimit);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
