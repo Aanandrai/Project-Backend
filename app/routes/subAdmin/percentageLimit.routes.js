@@ -34,6 +34,6 @@ module.exports = function (app) {
   app.delete(
     "/api/subadmin/deletepercentagelimit/:id",
     [authJwt.verifyToken, authJwt.isSubAdmin],
-    controller.deleteBlockNumber
+    controller.deletePercentageLimit
   );
 };
