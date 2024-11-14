@@ -30,10 +30,10 @@ module.exports = function (app) {
     controller.updatePercentageLimit
   );
 
-  // Delete Sub Admin PercentageLimit
-//   app.delete(
-//     "/api/subadmin/deleteblocknumber/:id",
-//     [authJwt.verifyToken, authJwt.isSubAdmin],
-//     controller.deleteBlockNumber
-//   );
+  //Delete Sub Admin PercentageLimit
+  app.delete(
+    "/api/subadmin/deletepercentagelimit/:id",
+    [authJwt.verifyToken, authJwt.isSubAdmin],
+    controller.deleteBlockNumber
+  );
 };
