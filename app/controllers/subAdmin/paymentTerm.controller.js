@@ -15,7 +15,7 @@ exports.addPaymentTerm = async (req, res) => {
       return;
     }
 
-    const today = moment().tz(haitiTimezone).format("yyyy-MM-DD");
+    const today = moment().tz(haitiTimezone).format("YYYY-MM-DD");
     
       
     let check={
@@ -167,11 +167,20 @@ exports.updatePaymentTerm = async (req, res) => {
       return;
     }
 
-    if(tempPaymentTerm.date!=moment().tz(haitiTimezone).format("yyyy-MM-DD")){
-      res.status(400).send({message:"You can not update past date"})
-      return;
-    }
+    let paymentTermDate = moment(tempPaymentTerm.date).startOf('day');
 
+      // Get the current date in Haiti timezone at the start of the day
+      let currentDate = moment().tz(haitiTimezone).startOf('day');
+
+      // Log the two moment objects for debugging
+      // console.log('Payment Term Date:', paymentTermDate.format());
+      // console.log('Current Date:', currentDate.format());
+
+      // Compare the two dates (ignoring time)
+      if (!paymentTermDate.isSame(currentDate, 'day')) {
+        res.status(400).send({ message: "You can not update past date" });
+        return;
+      }
 
     const paymentTerm = await PaymentTerm.findByIdAndUpdate(
       req.params.id,
@@ -180,6 +189,7 @@ exports.updatePaymentTerm = async (req, res) => {
     );
     res.send(paymentTerm);
   } catch (error) {
+    console.log(error)
     res.status(400).send(error);
   }
 };

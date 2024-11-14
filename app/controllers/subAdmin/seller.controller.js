@@ -48,7 +48,7 @@ exports.getseller = async (req, res) => {
         _id: user._id,
         userName: user.userName,
         superVisorId: user.superVisorId?._id || null, // Ensure superVisorId is present
-        superVisorName: user.superVisorId?.userName || "N/A", // Display supervisor's name, fallback to N/A
+        superVisorName: user.superVisorId?.userName || "None", // Display supervisor's name, fallback to N/A
         isActive: user.isActive,
         imei: user.imei,
       })),
