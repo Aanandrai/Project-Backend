@@ -8,11 +8,10 @@ exports.addseller = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    superVisorId =req.body.superVisorId
+    superVisorId = req.body.superVisorId;
     if (superVisorId === "") {
       delete req.body.superVisorId; // Remove if it's an empty string
-    } 
-   
+    }
 
     const user = new User({
       ...req.body,
@@ -23,7 +22,6 @@ exports.addseller = async (req, res) => {
     await user.save();
     res.status(201).send(user);
   } catch (err) {
-   
     res.status(400).send(err);
   }
 };
@@ -62,7 +60,6 @@ exports.getseller = async (req, res) => {
   }
 };
 
-
 exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
   try {
     // Fetch active sellers without a supervisor
@@ -70,9 +67,8 @@ exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
       subAdminId: req.userId,
       role: "seller",
       superVisorId: { $exists: false }, // Ensure superVisorId does not exist
-      isActive: true // Ensure the seller is active
-    })
-    .exec();
+      isActive: true, // Ensure the seller is active
+    }).exec();
 
     // Fetch sub-admin details (companyName, bonusFlag)
     const subadmin = await User.findOne(
@@ -98,24 +94,20 @@ exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
   }
 };
 
-
-
 // Update //tested
 exports.updateseller = async (req, res) => {
   const updates = Object.keys(req.body);
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(404).send({message:"User not found"});
+      res.status(404).send({ message: "User not found" });
     }
     updates.forEach((update) => {
-    
       if (`${req.body[update]}` != "") {
         // only update if the field exists in the req.body object
         user[update] = req.body[update];
-      }
-      else if(update == "superVisorId"){
-        user.superVisorId =undefined;
+      } else if (update == "superVisorId") {
+        user.superVisorId = undefined;
       }
     });
     if (req.body.password) {
