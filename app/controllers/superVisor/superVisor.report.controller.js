@@ -742,7 +742,7 @@ exports.getSellGameNumberInfo = async (req, res) => {
   try {
     const { lotteryCategoryName, gameCategory, gameNumber, fromDate, seller } =
       req.query;
-    const subAdminId = mongoose.Types.ObjectId(req.userId);
+    const superVisorId = mongoose.Types.ObjectId(req.userId);
     let seller_query = null;
     let sellerIds = [];
     let limitInfo = null;
@@ -767,7 +767,7 @@ exports.getSellGameNumberInfo = async (req, res) => {
 
 
     if (seller == "") {
-      const sellers = await User.find({ subAdminId: subAdminId }, { _id: 1 });
+      const sellers = await User.find({ superVisorId: superVisorId }, { _id: 1 });
       sellerIds = sellers.map((item) => item._id);
       seller_query = { $in: sellerIds };
     } else {
@@ -782,6 +782,10 @@ exports.getSellGameNumberInfo = async (req, res) => {
         { "limits.$": 1 }
       );
     }
+
+
+    
+
 
     if (limitInfo == null) {
       limitInfo = await Limit.findOne(
