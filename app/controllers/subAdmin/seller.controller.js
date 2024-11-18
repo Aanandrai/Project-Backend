@@ -97,7 +97,9 @@ exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
 // Update //tested
 exports.updateseller = async (req, res) => {
   const updates = Object.keys(req.body);
+
   try {
+    // Fetch user and supervisor data
     const user = await User.findById(req.params.id).populate("superVisorId");
     if (!user) {
       return res.status(404).send({ message: "User not found" });
@@ -105,35 +107,32 @@ exports.updateseller = async (req, res) => {
 
     const superVisorStatus = await User.findById(user.superVisorId).select('isActive');
 
-    let responseSent = false;  // Flag to track if a response is already sent
-
-    updates.forEach((update) => {
-      if (responseSent) return;  // If response is already sent, skip further processing
-
+    // Iterate over updates to modify user properties
+    for (const update of updates) {
       if (update === "isActive" && req.body[update] === true && superVisorStatus.isActive === false) {
-        responseSent = true;  // Mark that response is sent
+        // Check supervisor status before updating isActive
         return res.status(400).send({ message: "Supervisor is not active" });
       } else if (`${req.body[update]}` !== "") {
-        // only update if the field exists in the req.body object
+        // Only update if the field exists in req.body
         user[update] = req.body[update];
       } else if (update === "superVisorId") {
+        // Clear supervisor ID if not provided
         user.superVisorId = undefined;
       }
-    });
+    }
 
-    // If there's a password to update, handle it outside the loop
+    // If password is provided, hash and set it
     if (req.body.password) {
       user.password = await bcrypt.hash(req.body.password, 10);
     }
 
-    if (!responseSent) {
-      await user.save();
-      return res.send(user);  // Send the final response only once
-    }
+    // Save user and send response
+    await user.save();
+    return res.send(user); // Send the final response
+
   } catch (err) {
     console.log(err);
-    
-      return res.status(400).send(err);  // Send error response only if not already sent
+    return res.status(400).send(err); // Send error response if any
   }
 };
 
