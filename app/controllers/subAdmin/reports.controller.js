@@ -476,26 +476,148 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
       matchStage,
       {
         $lookup: {
+          from: "users",
+          localField: "seller",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo",
+      },
+      {
+        $lookup: {
           from: "paymentterms",
           let: {
             lotteryCategoryName: "$lotteryCategoryName",
+            seller: "$seller",
+            superVisor: "$sellerInfo.superVisorId",
             subAdmin: "$subAdmin",
+            date: "$date",
           },
           pipeline: [
             {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
-                    { $eq: ["$subAdmin", subAdminId] },
-                  ],
-                },
+              $facet: {
+                priority1: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority2: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority3: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority4: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority5: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority6: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin",subAdminId ] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
+            {
+              $project: {
+                // Get the first non-null and non-undefined payment term
+                paymentTerms: {
+                  $let: {
+                    vars: {
+                      priorities: [
+                        { $arrayElemAt: ["$priority1", 0] },
+                        { $arrayElemAt: ["$priority2", 0] },
+                        { $arrayElemAt: ["$priority3", 0] },
+                        { $arrayElemAt: ["$priority4", 0] },
+                        { $arrayElemAt: ["$priority5", 0] },
+                        { $arrayElemAt: ["$priority6", 0] }
+                      ]
+                    },
+                    in: {
+                      $first: {
+                        $filter: {
+                          input: "$$priorities",
+                          as: "priority",
+                          cond: { $ne: ["$$priority", null] }  // Only pick non-null priorities
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           ],
           as: "paymentTerms",
         },
-      },
+      },   
       {
         $lookup: {
           from: "winningnumbers",
@@ -519,11 +641,12 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
           lotteryCategoryName: 1,
           numbers: 1,
           winningNumbers: 1,
-          paymentTerms: 1,
+          paymentTerms: { $arrayElemAt: ["$paymentTerms", 0] },
         },
       },
     ]);
 
+   
     const resultBySeller = {};
 
     result.forEach((item) => {
@@ -533,11 +656,15 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
       let sumAmount = 0;
       let paidAmount = 0;
 
-      // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
+      sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
+      if (Array.isArray(item?.winningNumbers) &&
+        item?.winningNumbers?.length !== 0 && 
+        Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
+        item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
 
-      if (item.winningNumbers.length !== 0 && item.paymentTerms.length !== 0) {
+
         const winnumbers = item.winningNumbers[0].numbers;
-        const payterms = item.paymentTerms[0].conditions;
+        const payterms = item.paymentTerms?.paymentTerms?.conditions;
         numbers.forEach((gameNumber) => {
           winnumbers.forEach((winNumber) => {
             if (
@@ -555,9 +682,9 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
             }
           });
 
-          if (!gameNumber.bonus) {
-            sumAmount += gameNumber.amount;
-          }
+          // if (!gameNumber.bonus) {
+          //   sumAmount += gameNumber.amount;
+          // }
         });
       }
 
@@ -575,7 +702,7 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
 
     res.send({ success: true, data: resultBySeller });
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.status(500).send(err);
   }
 };

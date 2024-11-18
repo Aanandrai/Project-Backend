@@ -690,7 +690,7 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
       let sumAmount = 0;
       let paidAmount = 0;
 
-      // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
+      sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
 
       if (Array.isArray(item?.winningNumbers) &&
         item?.winningNumbers?.length !== 0 && 
@@ -716,9 +716,9 @@ exports.getSellDetailsByAllLoteryCategory = async (req, res) => {
             }
           });
 
-          if (!gameNumber.bonus) {
-            sumAmount += gameNumber.amount;
-          }
+          // if (!gameNumber.bonus) {
+          //   sumAmount += gameNumber.amount;
+          // }
         });
       }
 
