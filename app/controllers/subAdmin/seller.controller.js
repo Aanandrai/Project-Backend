@@ -103,7 +103,7 @@ exports.updateseller = async (req, res) => {
       res.status(404).send({ message: "User not found" });
     }
     updates.forEach((update) => {
-      if (`${req.body[update]}` != "") {
+      if (`${req.body[update]}` != "" && `${req.body[update]}` != "undefined") {
         // only update if the field exists in the req.body object
         user[update] = req.body[update];
       } else if (update == "superVisorId") {
