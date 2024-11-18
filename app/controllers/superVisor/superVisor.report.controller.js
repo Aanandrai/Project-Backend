@@ -224,12 +224,13 @@ exports.getSaleReports = async (req, res) => {
     ]);
 
     const resultBySeller = {};
-    // console.log(result)
 
     if(result.length==0){
       res.send({ success: true, data: resultBySeller });
       return
     }
+
+    
 
     result?.forEach((item) => {
       const sellerName = item.seller;
@@ -239,7 +240,7 @@ exports.getSaleReports = async (req, res) => {
       let sumAmount = 0;
       let paidAmount = 0;
 
-      // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
+      sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
 
       if (Array.isArray(item?.winningNumbers) &&
         item?.winningNumbers?.length !== 0 && 
@@ -252,6 +253,9 @@ exports.getSaleReports = async (req, res) => {
         // console.log(item)
         const payterms = item.paymentTerms?.paymentTerms?.conditions;
         // console.log(payterms)
+
+
+        
 
         // here we have to give warning if payment terms are not set
         if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
@@ -274,9 +278,9 @@ exports.getSaleReports = async (req, res) => {
               });
             }
 
-            if (!gameNumber.bonus) {
-              sumAmount += gameNumber.amount;
-            }
+            // if (!gameNumber.bonus) {
+            //   sumAmount += gameNumber.amount;
+            // }
           });
         }
       }
