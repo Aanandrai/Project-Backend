@@ -98,27 +98,46 @@ exports.getsellerWhoNotHaveSupervisor = async (req, res) => {
 exports.updateseller = async (req, res) => {
   const updates = Object.keys(req.body);
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).populate("superVisorId");
     if (!user) {
-      res.status(404).send({ message: "User not found" });
+      return res.status(404).send({ message: "User not found" });
     }
+
+    const superVisorStatus = await User.findById(user.superVisorId).select('isActive');
+
+    let responseSent = false;  // Flag to track if a response is already sent
+
     updates.forEach((update) => {
-      if (`${req.body[update]}` != "" && `${req.body[update]}` != "undefined") {
+      if (responseSent) return;  // If response is already sent, skip further processing
+
+      if (update === "isActive" && req.body[update] === true && superVisorStatus.isActive === false) {
+        responseSent = true;  // Mark that response is sent
+        return res.status(400).send({ message: "Supervisor is not active" });
+      } else if (`${req.body[update]}` !== "") {
         // only update if the field exists in the req.body object
         user[update] = req.body[update];
-      } else if (update == "superVisorId") {
+      } else if (update === "superVisorId") {
         user.superVisorId = undefined;
       }
     });
+
+    // If there's a password to update, handle it outside the loop
     if (req.body.password) {
       user.password = await bcrypt.hash(req.body.password, 10);
     }
-    await user.save();
-    res.send(user);
+
+    if (!responseSent) {
+      await user.save();
+      return res.send(user);  // Send the final response only once
+    }
   } catch (err) {
-    res.status(400).send(err);
+    console.log(err);
+    if (!responseSent) {
+      return res.status(400).send(err);  // Send error response only if not already sent
+    }
   }
 };
+
 
 // Update
 exports.updateBonusFlag = async (req, res) => {

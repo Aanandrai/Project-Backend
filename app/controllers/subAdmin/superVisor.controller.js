@@ -63,6 +63,21 @@ exports.updatesuperVisor = async (req, res) => {
       }
     });
 
+    if(req.body.isActive === false){
+      const userUnderSupervisor = await User.find({superVisorId: req.params.id});
+      userUnderSupervisor.forEach(async (user) => {
+        user.isActive = false;
+        await user.save();
+        }
+      )}
+      else if(req.body.isActive === true){
+        const userUnderSupervisor = await User.find({superVisorId: req.params.id});
+        userUnderSupervisor.forEach(async (user) => {
+          user.isActive = true;
+          await user.save();
+        }
+      )}
+
     if (req.body.password) {
       user.password = await bcrypt.hash(req.body.password, 10);
     }
