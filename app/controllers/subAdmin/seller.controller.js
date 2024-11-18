@@ -132,9 +132,8 @@ exports.updateseller = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (!responseSent) {
+    
       return res.status(400).send(err);  // Send error response only if not already sent
-    }
   }
 };
 
