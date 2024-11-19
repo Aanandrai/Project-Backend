@@ -937,7 +937,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               } 
             }
           ]);
-          console.log("LimitPercentArray",LimitPercentArray)
+          // console.log("LimitPercentArray",LimitPercentArray)
 
           const gameLimitPercent = LimitPercentArray[0]?.limitPercent;
 
@@ -961,7 +961,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           }
         }
 
-        console.log("maxAmountPriceBuy",maxAmountPriceBuy)
+        // console.log("maxAmountPriceBuy",maxAmountPriceBuy)
 
          // Total limit (subAdmin limit ) amount 
          let subAdminLimitsCalcId=null
@@ -1051,7 +1051,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
             },
             ]);
             // console.log("totalSoldQuantitySubAdmin",totalSoldQuantitySubAdmin)
-            console.log("soldQuantitySubAdmin",soldQuantitySubAdmin)
+            // console.log("soldQuantitySubAdmin",soldQuantitySubAdmin)
           const totalSoldBySubAmin =totalSoldQuantitySubAdmin?.length > 0 ? totalSoldQuantitySubAdmin[0]?.totalSold : 0;
           remainingQuantitySubAdmin=subAdminLimit[0]?.limits.limitsButs-totalSoldBySubAmin 
         }
@@ -1221,7 +1221,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
 
 
           if(subAdminLimitsCalcId!=null){
-            console.log("actualmaxAmountPriceBuy",actualmaxAmountPriceBuy)
+            // console.log("actualmaxAmountPriceBuy",actualmaxAmountPriceBuy)
             const updatedLimit=await LimitCalc.findOneAndUpdate(
               {
                 _id: subAdminLimitsCalcId,
@@ -1255,7 +1255,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               // console.log("upsertedLimitAdmin",upsertedLimit)
             }
           }else{
-            console.log("actualmaxAmountPriceBuy",actualmaxAmountPriceBuy)
+            // console.log("actualmaxAmountPriceBuy",actualmaxAmountPriceBuy)
            
             if(subAdminLimitId){
               const newLimit = new LimitCalc({
