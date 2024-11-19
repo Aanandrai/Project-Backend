@@ -765,19 +765,20 @@ exports.getSellGameNumberInfo = async (req, res) => {
       seller_query = { $in: sellerIds };
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
-
-      // superVisor limit 
-      limitInfo=await Limit.findOne(
-        {
-          lotteryCategoryName,
-          subAdmin:subAdminId,
-          superVisor:superVisorId,
-          seller:{$exists:false},
-          "limits.gameCategory": limitGameCategory,
-        },  
-        { "limits.$": 1 }
-      );
+      
     }
+
+    // superVisor limit
+    limitInfo=await Limit.findOne(
+      {
+        lotteryCategoryName,
+        subAdmin:subAdminId,
+        superVisor:superVisorId,
+        seller:{$exists:false},
+        "limits.gameCategory": limitGameCategory,
+      },  
+      { "limits.$": 1 }
+    );
 
 
   
