@@ -784,7 +784,7 @@ exports.getSellGameNumberInfo = async (req, res) => {
     // if until now limitInfo not found then apply subAdmin limit means 
     // you call for all seller 
     // or seller you select does not have superVisor limit if superVisor exist else seller limit not exist
-    console.log(limitInfo)
+    
     if (limitInfo == null) {
       // subAdminId and LotteryCategoryName
       limitInfo = await Limit.findOne(
