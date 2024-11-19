@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const db = require("../../models");
+const LotteryCategory = require("../../models/lotteryCategory.model");
 const Ticket = db.ticket;
 const User = db.user;
 const Limit = db.limits;
@@ -712,6 +713,11 @@ exports.getSellGameNumberInfo = async (req, res) => {
   try {
     const { lotteryCategoryName, gameCategory, gameNumber, fromDate, seller } =
       req.query;
+      // console.log(fromDate)
+      // console.log(seller)
+      // console.log(lotteryCategoryName)
+      // console.log(gameCategory)
+      // console.log(gameNumber)
     const subAdminId = mongoose.Types.ObjectId(req.userId);
     let seller_query = null;
     let sellerIds = [];
@@ -742,22 +748,52 @@ exports.getSellGameNumberInfo = async (req, res) => {
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
 
-      limitInfo = await Limit.findOne(
-        {
+      const superVisor = await User.findOne({ _id: seller_query },{"superVisorId.$":1})
+      const superVisorId = superVisor?.superVisorId
+      console.log(superVisorId)
+
+      // if superVisor exist mean no seller limit possible there so apply superVisor limit
+      if(superVisorId){
+        // superViosrId and lotteryCategoryName
+        limitInfo=await Limit.findOne({
           lotteryCategoryName,
-          seller: seller_query,
-          "limits.gameCategory": limitGameCategory,
-        },
-        { "limits.$": 1 }
-      );
+          subAdmin: subAdminId,
+          superVisor:superVisorId,
+          seller:{ $exists: false },
+          "limits.gameCategory": limitGameCategory
+        },{ "limits.$": 1 })
+
+      }else{
+        // if no superViosr exist then apply seller limit
+
+        // sellerId and lotteryCategoryName
+        limitInfo = await Limit.findOne(
+          {
+            lotteryCategoryName,
+            seller: seller_query,
+            subAdmin: subAdminId,
+            "limits.gameCategory": limitGameCategory,
+            superVisor:{ $exists: false}
+          },
+          { "limits.$": 1 }
+        )
+      }
+
     }
 
+    // if until now limitInfo not found then apply subAdmin limit means 
+    // you call for all seller 
+    // or seller you select does not have superVisor limit if superVisor exist else seller limit not exist
+    console.log(limitInfo)
     if (limitInfo == null) {
+      // subAdminId and LotteryCategoryName
       limitInfo = await Limit.findOne(
         {
           lotteryCategoryName,
           subAdmin: subAdminId,
           "limits.gameCategory": limitGameCategory,
+          superVisor:{ $exists: false },
+          seller:{ $exists: false }
         },
         { "limits.$": 1 }
       );
