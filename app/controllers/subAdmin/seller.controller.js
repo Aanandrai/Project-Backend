@@ -109,7 +109,7 @@ exports.updateseller = async (req, res) => {
 
     // Iterate over updates to modify user properties
     for (const update of updates) {
-      if (update === "isActive" && req.body[update] === true && superVisorStatus.isActive === false) {
+      if (update === "isActive" && req.body[update] === true && superVisorStatus?.isActive === false) {
         // Check supervisor status before updating isActive
         return res.status(400).send({ message: "Supervisor is not active" });
       } else if (`${req.body[update]}` !== "") {
