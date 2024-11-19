@@ -899,9 +899,9 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
       }
     }
 
-    if(totalBLTAmount==0){
-      return { success: false, error: `BLT  Amount Ticket can not be Zero ` };
-    }
+    // if(totalBLTAmount==0){
+    //   return { success: false, error: `BLT  Amount Ticket can not be Zero ` };
+    // }
 
     // soft testing upto here
 
