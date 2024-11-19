@@ -753,21 +753,10 @@ exports.getSellGameNumberInfo = async (req, res) => {
 
     let limitGameCategory = gameCategory;
 
-    // if (
-    //   gameCategory == "L4C 1" ||
-    //   gameCategory == "L4C 2" ||
-    //   gameCategory == "L4C 3"
-    // ) {
-    //   limitGameCategory = "L4C";
-    // } else if (
-    //   gameCategory == "L5C 1" ||
-    //   gameCategory == "L5C 2" ||
-    //   gameCategory == "L5C 3"
-    // ) {
-    //   limitGameCategory = "L5C";
-    // } else {
-    //   limitGameCategory = gameCategory;
-    // }
+    const subAdmin=await User.findOne({_id:superVisorId},{_id:0,subAdminId:1})
+    const subAdminId=subAdmin.subAdminId
+
+    //
 
 
     if (seller == "") {
@@ -777,25 +766,30 @@ exports.getSellGameNumberInfo = async (req, res) => {
     } else {
       seller_query = mongoose.Types.ObjectId(seller);
 
-      limitInfo = await Limit.findOne(
+      // superVisor limit 
+      limitInfo=await Limit.findOne(
         {
           lotteryCategoryName,
-          seller: seller_query,
+          subAdmin:subAdminId,
+          superVisor:superVisorId,
+          seller:{$exists:false},
           "limits.gameCategory": limitGameCategory,
-        },
+        },  
         { "limits.$": 1 }
       );
     }
 
 
-    
+  
 
-
+    // subAdmin limit 
     if (limitInfo == null) {
       limitInfo = await Limit.findOne(
         {
           lotteryCategoryName,
           subAdmin: subAdminId,
+          superVisor:{$exists:false},
+          seller:{$exists:false},
           "limits.gameCategory": limitGameCategory,
         },
         { "limits.$": 1 }
