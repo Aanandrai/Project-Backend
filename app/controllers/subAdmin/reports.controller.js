@@ -750,7 +750,7 @@ exports.getSellGameNumberInfo = async (req, res) => {
 
       const superVisor = await User.findOne({ _id: seller_query },{"superVisorId.$":1})
       const superVisorId = superVisor?.superVisorId
-      console.log(superVisorId)
+      // console.log(superVisorId)
 
       // if superVisor exist mean no seller limit possible there so apply superVisor limit
       if(superVisorId){

@@ -77,13 +77,22 @@ exports.addPaymentTerm = async (req, res) => {
 exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
   try {
     const fromDate=req.query.fromDate
+    const lotteryCategoryName=req.query.lotteryCategoryName
 
-    const paymentTerms = await PaymentTerm.find({
+    console.log(lotteryCategoryName)
+
+    const check={
       subAdmin: req.userId,
       superVisor: { $exists: false }, // Ensure superVisor does not exist
       seller: { $exists: false },// Ensure seller does not exist
       date: new Date(fromDate)
-    }).populate("subAdmin")
+    }
+
+    if(lotteryCategoryName){
+      check.lotteryCategoryName=lotteryCategoryName
+    }
+
+    const paymentTerms = await PaymentTerm.find(check).populate("subAdmin")
     res.send(paymentTerms);
   } catch (error) {
     console.log(error)

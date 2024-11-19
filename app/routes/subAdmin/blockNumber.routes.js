@@ -18,7 +18,7 @@ module.exports = function (app) {
   app.get(
     "/api/subadmin/getblocknumber",
     [authJwt.verifyToken, authJwt.isSubAdmin],
-    controller.getBlockNumber
+    controller.getBlockNumberAll
   );
 
   // Update Sub Admin

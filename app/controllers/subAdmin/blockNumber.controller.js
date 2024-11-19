@@ -10,7 +10,6 @@ exports.addBlockNumber = async (req, res) => {
   // Prepare the data for the BlockNumber document
   const blockNumberData = {
     subAdmin,
-    lotteryCategoryName,
     gameCategory,
     number,
   };
@@ -19,10 +18,14 @@ exports.addBlockNumber = async (req, res) => {
   if (superVisorId) {
     blockNumberData.superVisor = superVisorId;
   }
-
-  if (sellerId) {
+  else if(sellerId) {
     blockNumberData.seller = sellerId;
   }
+
+  if(lotteryCategoryName){
+    blockNumberData.lotteryCategoryName=lotteryCategoryName
+  }
+
   try {
     const blockNumber = new BlockNumber(blockNumberData);
     await blockNumber.save();
@@ -35,7 +38,7 @@ exports.addBlockNumber = async (req, res) => {
 };
 
 // Read
-exports.getBlockNumber = async (req, res) => {
+exports.getBlockNumberAll = async (req, res) => {
 
   try {
     const blockNumbers = await BlockNumber.find({ subAdmin: req.userId });
