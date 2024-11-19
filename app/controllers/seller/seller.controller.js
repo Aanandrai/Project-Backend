@@ -937,6 +937,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
               } 
             }
           ]);
+          console.log("LimitPercentArray",LimitPercentArray)
 
           const gameLimitPercent = LimitPercentArray[0]?.limitPercent;
 
@@ -960,6 +961,7 @@ async function requestTicketCheck(lotteryCategoryName, sellerId, numbers,startTi
           }
         }
 
+        console.log("maxAmountPriceBuy",maxAmountPriceBuy)
 
          // Total limit (subAdmin limit ) amount 
          let subAdminLimitsCalcId=null

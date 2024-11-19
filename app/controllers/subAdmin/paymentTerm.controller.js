@@ -79,7 +79,7 @@ exports.readPaymentTermBySubAdminIdAll = async (req, res) => {
     const fromDate=req.query.fromDate
     const lotteryCategoryName=req.query.lotteryCategoryName
 
-    console.log(lotteryCategoryName)
+    // console.log(lotteryCategoryName)
 
     const check={
       subAdmin: req.userId,
