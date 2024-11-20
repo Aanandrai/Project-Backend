@@ -678,7 +678,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
           console.log("inside the if of check winning number")
 
         const winnumbers = item.winningNumbers[0].numbers;
-        const payterms = item.paymentTerms[0].conditions;
+        const payterms = item.paymentTerms?.paymentTerms?.conditions;
         // console.log("winnumbers",winnumbers)
         // console.log("payterm",payterms)
         if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
