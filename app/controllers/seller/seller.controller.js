@@ -675,16 +675,14 @@ exports.getSaleReportsForSeller = async (req, res) => {
         Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
         item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
 
-          console.log("inside the if of check winning number")
+          
 
         const winnumbers = item.winningNumbers[0].numbers;
         const payterms = item.paymentTerms?.paymentTerms?.conditions;
-        // console.log("winnumbers",winnumbers)
-        // console.log("payterm",payterms)
+     
         if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
           numbers.forEach((gameNumber) => {
 
-            console.log("check the gameNumber")
             
             winnumbers.forEach((winNumber) => {
             console.log("check the winNumber")
@@ -692,8 +690,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
                 gameNumber.number === winNumber.number &&
                 gameNumber.gameCategory === winNumber.gameCategory
               ) {
-                // console.log("gamenumber", gameNumber)
-                // console.log("winNumber",winNumber)
+                
                 payterms.forEach((term) => {
                   if (
                     term.gameCategory === winNumber.gameCategory &&
@@ -704,11 +701,7 @@ exports.getSaleReportsForSeller = async (req, res) => {
                 });
               }
             });
-            // console.log("sum",sumAmount)
-
-            // if (!gameNumber.bonus) {
-            //   sumAmount += gameNumber.amount;
-            // }
+          
           });
         }
       }
