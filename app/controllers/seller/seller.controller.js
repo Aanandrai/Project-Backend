@@ -654,66 +654,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
       },
     ]);
 
-
-
-
-
-
-    // const result = await Ticket.aggregate([
-    //   matchStage,
-    //   {
-    //     $lookup: {
-    //       from: "paymentterms",
-    //       let: {
-    //         lotteryCategoryName: "$lotteryCategoryName",
-    //         // subAdmin: "$subAdmin",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
-    //                 { $eq: ["$subAdmin", seller_db.subAdminId] },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "paymentTerms",
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "winningnumbers",
-    //       let: { lotteryCategoryName: "$lotteryCategoryName", date: "$date" },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: query,
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "winningNumbers",
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       ticketId: 1,
-    //       date: 1,
-    //       lotteryCategoryName: 1,
-    //       numbers: 1,
-    //       winningNumbers: 1,
-    //       paymentTerms: 1,
-    //     },
-    //   },
-    // ]);
  
     let sumAmount = 0;
     let paidAmount = 0;
-
+    console.log("result",result)
     if(result.length==0){
       res.send({ success: true, data: resultBySeller });
       return
