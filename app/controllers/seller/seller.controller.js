@@ -658,9 +658,9 @@ exports.getSaleReportsForSeller = async (req, res) => {
     let sumAmount = 0;
     let paidAmount = 0;
     // console.log("result",result)
-    const resultBySeller = {};
+   
     if(result.length==0){
-      res.send({ success: true, data: resultBySeller });
+      res.send({ success: true, data: {}});
       return
     }
 
