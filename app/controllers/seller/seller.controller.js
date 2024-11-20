@@ -474,32 +474,156 @@ exports.getSaleReportsForSeller = async (req, res) => {
     }
   
 
-    const seller_db_info = await User.findOne({ _id: seller });
+    const seller_db = await User.findOne({ _id: seller });
+    // seller_db_info.subAdminId
+
 
     const result = await Ticket.aggregate([
       matchStage,
       {
         $lookup: {
+          from: "users",
+          localField: "seller",
+          foreignField: "_id",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo",
+      },
+      {
+        $lookup: {
           from: "paymentterms",
           let: {
             lotteryCategoryName: "$lotteryCategoryName",
-            // subAdmin: "$subAdmin",
+            seller: "$seller",
+            superVisor: "$sellerInfo.superVisorId",
+            subAdmin: "$subAdmin",
+            date: "$date",
           },
           pipeline: [
             {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
-                    { $eq: ["$subAdmin", seller_db_info.subAdminId] },
-                  ],
-                },
+              $facet: {
+                priority1: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin",seller_db.subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority2: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", seller_db.subAdminId] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority3: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", seller_db.subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority4: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", seller_db.subAdminId] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority5: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", seller_db.subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority6: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin",seller_db.subAdminId ] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
+            {
+              $project: {
+                // Get the first non-null and non-undefined payment term
+                paymentTerms: {
+                  $let: {
+                    vars: {
+                      priorities: [
+                        { $arrayElemAt: ["$priority1", 0] },
+                        { $arrayElemAt: ["$priority2", 0] },
+                        { $arrayElemAt: ["$priority3", 0] },
+                        { $arrayElemAt: ["$priority4", 0] },
+                        { $arrayElemAt: ["$priority5", 0] },
+                        { $arrayElemAt: ["$priority6", 0] }
+                      ]
+                    },
+                    in: {
+                      $first: {
+                        $filter: {
+                          input: "$$priorities",
+                          as: "priority",
+                          cond: { $ne: ["$$priority", null] }  // Only pick non-null priorities
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           ],
           as: "paymentTerms",
         },
-      },
+      },      
       {
         $lookup: {
           from: "winningnumbers",
@@ -518,57 +642,126 @@ exports.getSaleReportsForSeller = async (req, res) => {
       },
       {
         $project: {
+          seller: "$sellerInfo.userName",
+          supervisor: "$sellerInfo.supervisor",
           ticketId: 1,
           date: 1,
           lotteryCategoryName: 1,
           numbers: 1,
           winningNumbers: 1,
-          paymentTerms: 1,
+          paymentTerms: { $arrayElemAt: ["$paymentTerms", 0] },
         },
       },
     ]);
+
+
+
+
+
+
+    // const result = await Ticket.aggregate([
+    //   matchStage,
+    //   {
+    //     $lookup: {
+    //       from: "paymentterms",
+    //       let: {
+    //         lotteryCategoryName: "$lotteryCategoryName",
+    //         // subAdmin: "$subAdmin",
+    //       },
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+    //                 { $eq: ["$subAdmin", seller_db.subAdminId] },
+    //               ],
+    //             },
+    //           },
+    //         },
+    //       ],
+    //       as: "paymentTerms",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "winningnumbers",
+    //       let: { lotteryCategoryName: "$lotteryCategoryName", date: "$date" },
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: query,
+    //             },
+    //           },
+    //         },
+    //       ],
+    //       as: "winningNumbers",
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       ticketId: 1,
+    //       date: 1,
+    //       lotteryCategoryName: 1,
+    //       numbers: 1,
+    //       winningNumbers: 1,
+    //       paymentTerms: 1,
+    //     },
+    //   },
+    // ]);
  
     let sumAmount = 0;
     let paidAmount = 0;
 
+    if(result.length==0){
+      res.send({ success: true, data: resultBySeller });
+      return
+    }
+
     result.forEach((item) => {
-      const numbers = item.numbers;
+      const numbers = item?.numbers;
   
 
-      // sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
+      sumAmount += numbers.reduce((total, value) => total + value.amount, 0);
       // console.log(sumAmount)
-      if (item.winningNumbers.length !== 0 && item.paymentTerms.length !== 0) {
+      if (Array.isArray(item?.winningNumbers) &&
+        item?.winningNumbers?.length !== 0 && 
+        Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
+        item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
 
         const winnumbers = item.winningNumbers[0].numbers;
         const payterms = item.paymentTerms[0].conditions;
         // console.log("winnumbers",winnumbers)
         // console.log("payterm",payterms)
-        numbers.forEach((gameNumber) => {
-          
-          winnumbers.forEach((winNumber) => {
-          
-            if (
-              gameNumber.number === winNumber.number &&
-              gameNumber.gameCategory === winNumber.gameCategory
-            ) {
-              // console.log("gamenumber", gameNumber)
-              // console.log("winNumber",winNumber)
-              payterms.forEach((term) => {
-                if (
-                  term.gameCategory === winNumber.gameCategory &&
-                  winNumber.position === term.position
-                ) {
-                  paidAmount += gameNumber.amount * term.condition;
-                }
-              });
-            }
-          });
-          // console.log("sum",sumAmount)
+        if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
+          numbers.forEach((gameNumber) => {
+            
+            winnumbers.forEach((winNumber) => {
+            
+              if (
+                gameNumber.number === winNumber.number &&
+                gameNumber.gameCategory === winNumber.gameCategory
+              ) {
+                // console.log("gamenumber", gameNumber)
+                // console.log("winNumber",winNumber)
+                payterms.forEach((term) => {
+                  if (
+                    term.gameCategory === winNumber.gameCategory &&
+                    winNumber.position === term.position
+                  ) {
+                    paidAmount += gameNumber.amount * term.condition;
+                  }
+                });
+              }
+            });
+            // console.log("sum",sumAmount)
 
-          if (!gameNumber.bonus) {
-            sumAmount += gameNumber.amount;
-          }
-        });
+            // if (!gameNumber.bonus) {
+            //   sumAmount += gameNumber.amount;
+            // }
+          });
+        }
       }
     });
     
