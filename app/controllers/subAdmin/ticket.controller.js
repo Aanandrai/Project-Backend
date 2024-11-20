@@ -288,7 +288,7 @@ exports.matchWinningNumbers = async (req, res) => {
           let numbers = item.numbers;
           if (item.winningNumbers.length == 0) return false;
           let winnumbers = item.winningNumbers[0].numbers;
-           let payterms = item.paymentTerms[0]?.conditions;
+           let payterms = item.paymentTerms?.paymentTerms?.conditions;
          
           let paidAmount = 0;
 
