@@ -287,59 +287,67 @@ exports.matchWinningNumbers = async (req, res) => {
 
           let numbers = item.numbers;
           if (item.winningNumbers.length == 0) return false;
-          let winnumbers = item.winningNumbers[0].numbers;
-           let payterms = item.paymentTerms?.paymentTerms?.conditions;
-         
-          let paidAmount = 0;
+
+          if (Array.isArray(item?.winningNumbers) &&
+          item?.winningNumbers?.length !== 0 && 
+          Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
+          item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
+
+              let winnumbers = item.winningNumbers[0].numbers;
+              let payterms = item.paymentTerms?.paymentTerms?.conditions;
+            
+              let paidAmount = 0;
 
 
-          // console.log(winnumbers)
-          // console.log(payterms)
+              // console.log(winnumbers)
+              // console.log(payterms)
 
 
-          const winGameNumber = [];
-          let winTicketFlag = false;
-         
+              const winGameNumber = [];
+              let winTicketFlag = false;
+            
+              if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
+                numbers.forEach((gameNumber) => {
+                  let winNumberFlag = false;
+                  winnumbers.forEach((winNumber) => {
+                    if (
+                      gameNumber.number === winNumber.number &&
+                      gameNumber.gameCategory === winNumber.gameCategory
+                    ) {
+                      winNumberFlag = true;
+                      payterms.forEach((term) => {
+                        if (
+                          term.gameCategory === winNumber.gameCategory &&
+                          winNumber.position === term.position
+                        ) {
+                          paidAmount += gameNumber.amount * term.condition;
+                        }
+                      });
 
-          numbers.forEach((gameNumber) => {
-            let winNumberFlag = false;
-            winnumbers.forEach((winNumber) => {
-              if (
-                gameNumber.number === winNumber.number &&
-                gameNumber.gameCategory === winNumber.gameCategory
-              ) {
-                winNumberFlag = true;
-                payterms.forEach((term) => {
-                  if (
-                    term.gameCategory === winNumber.gameCategory &&
-                    winNumber.position === term.position
-                  ) {
-                    paidAmount += gameNumber.amount * term.condition;
+                      // console.log(paidAmount)
+                      return;
+                    }
+                  });
+
+                  if (winNumberFlag) {
+                    winGameNumber.push({ ...gameNumber, winFlag: true });
+                    winTicketFlag = true;
+                  } else {
+                    winGameNumber.push(gameNumber);
                   }
                 });
-
-                // console.log(paidAmount)
-                return;
               }
-            });
 
-            if (winNumberFlag) {
-              winGameNumber.push({ ...gameNumber, winFlag: true });
-              winTicketFlag = true;
-            } else {
-              winGameNumber.push(gameNumber);
-            }
-          });
-
-          if (winTicketFlag) {
-            winTicket.push({
-              ticketId: item.ticketId,
-              date: item.date,
-              lotteryCategoryName: item.lotteryCategoryName,
-              seller: item.seller,
-              numbers: winGameNumber,
-              paidAmount: paidAmount,
-            });
+              if (winTicketFlag) {
+                winTicket.push({
+                  ticketId: item.ticketId,
+                  date: item.date,
+                  lotteryCategoryName: item.lotteryCategoryName,
+                  seller: item.seller,
+                  numbers: winGameNumber,
+                  paidAmount: paidAmount,
+                });
+              }
           }
         });
         res.send({ success: true, data: winTicket });
