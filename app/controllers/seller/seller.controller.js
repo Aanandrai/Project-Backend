@@ -182,7 +182,7 @@ exports.newTicket = async (req, res) => {
             return;
           } else {
             const newId = savedTicket.ticketId;
-            console.loog(lotteryCategoryName)
+            console.log(lotteryCategoryName)
             console.log(new_numbers)
             console.log("new ticket is successfull")
             res.send(
