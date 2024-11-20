@@ -236,6 +236,7 @@ exports.matchWinningNumbers = async (req, res) => {
       },      
       {
         $lookup: {
+          
           from: "winningnumbers",
           let: { lotteryCategoryName: "$lotteryCategoryName", date: "$date" },
           pipeline: [
@@ -252,6 +253,7 @@ exports.matchWinningNumbers = async (req, res) => {
       },
       {
         $project: {
+          _id:1,
           seller: "$sellerInfo.userName",
           supervisor: "$sellerInfo.supervisor",
           ticketId: 1,

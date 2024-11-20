@@ -659,10 +659,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
     let paidAmount = 0;
     // console.log("result",result)
    
-    if(result.length==0){
-      res.send({ success: true, data: {}});
-      return
-    }
+    // if(result.length==0){
+    //   res.send({ success: true, data: {}});
+    //   return
+    // }
 
     result.forEach((item) => {
       const numbers = item?.numbers;
@@ -675,15 +675,19 @@ exports.getSaleReportsForSeller = async (req, res) => {
         Array.isArray(item?.paymentTerms?.paymentTerms?.conditions) &&
         item?.paymentTerms?.paymentTerms?.conditions?.length !== 0) {
 
+          console.log("inside the if of check winning number")
+
         const winnumbers = item.winningNumbers[0].numbers;
         const payterms = item.paymentTerms[0].conditions;
         // console.log("winnumbers",winnumbers)
         // console.log("payterm",payterms)
         if (Array.isArray(numbers) && numbers.length > 0 && Array.isArray(payterms)  && payterms.length > 0) {
           numbers.forEach((gameNumber) => {
+
+            console.log("check the gameNumber")
             
             winnumbers.forEach((winNumber) => {
-            
+            console.log("check the winNumber")
               if (
                 gameNumber.number === winNumber.number &&
                 gameNumber.gameCategory === winNumber.gameCategory
@@ -710,10 +714,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
       }
     });
     
-    console.log(sumAmount,paidAmount)
+    console.log("sumAmount",sumAmount,paidAmount)
     res.send({ success: true, data: { sum: sumAmount, paid: paidAmount } });
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.status(500).send(err);
   }
 };
