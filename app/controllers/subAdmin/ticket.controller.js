@@ -56,9 +56,9 @@ exports.matchWinningNumbers = async (req, res) => {
     query.push({ $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] });
     query.push({ $eq: ["$date", "$$date"] });
 
-    if (lotteryCategoryName != "") {
-      query.push({ $eq: ["$lotteryCategoryName", lotteryCategoryName] });
-    }
+    // if (lotteryCategoryName != "") {
+    //   query.push({ $eq: ["$lotteryCategoryName", lotteryCategoryName] });
+    // }
 
     let seller_query = null;
     let sellerIds = [];
@@ -73,22 +73,171 @@ exports.matchWinningNumbers = async (req, res) => {
       seller_query = mongoose.Types.ObjectId(seller);
     }
 
+    const matchStage = {
+      $match: {
+        date: { $gte: new Date(fromDate), $lte: new Date(toDate) },
+        seller: seller_query,
+        isDelete: false,
+      },
+    };
 
-    Ticket.aggregate([
+    if (lotteryCategoryName !== "") {
+      query.push({ $eq: ["$lotteryCategoryName", lotteryCategoryName] });
+      matchStage.$match.lotteryCategoryName = lotteryCategoryName;
+    }
+
+
+
+    await Ticket.aggregate([
+      matchStage,
       {
-        $match: {
-          date: { $gte: new Date(fromDate), $lte: new Date(toDate) },
-          seller: seller_query,
-          isDelete: false,
+        $lookup: {
+          from: "users",
+          localField: "seller",
+          foreignField: "_id",
+          as: "sellerInfo",
         },
       },
       {
+        $unwind: "$sellerInfo",
+      },
+      {
         $lookup: {
-          from: "winningnumbers", // The collection name for WinningNumber model
+          from: "paymentterms",
           let: {
             lotteryCategoryName: "$lotteryCategoryName",
+            seller: "$seller",
+            superVisor: "$sellerInfo.superVisorId",
+            subAdmin: "$subAdmin",
             date: "$date",
           },
+          pipeline: [
+            {
+              $facet: {
+                priority1: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority2: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$seller", "$$seller"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority3: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority4: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$superVisor", "$$superVisor"] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority5: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin", subAdminId] },
+                          { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $eq: ["$date", "$$date"] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                priority6: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subAdmin",subAdminId ] },
+                          { $eq: ["$date", "$$date"] },
+                          { $not: {$ifNull:["$seller", false] }},
+                          { $not: {$ifNull:["$superVisor", false]} },
+                          { $not: { $ifNull: ["$lotteryCategoryName", false] }  },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                // Get the first non-null and non-undefined payment term
+                paymentTerms: {
+                  $let: {
+                    vars: {
+                      priorities: [
+                        { $arrayElemAt: ["$priority1", 0] },
+                        { $arrayElemAt: ["$priority2", 0] },
+                        { $arrayElemAt: ["$priority3", 0] },
+                        { $arrayElemAt: ["$priority4", 0] },
+                        { $arrayElemAt: ["$priority5", 0] },
+                        { $arrayElemAt: ["$priority6", 0] }
+                      ]
+                    },
+                    in: {
+                      $first: {
+                        $filter: {
+                          input: "$$priorities",
+                          as: "priority",
+                          cond: { $ne: ["$$priority", null] }  // Only pick non-null priorities
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          as: "paymentTerms",
+        },
+      },      
+      {
+        $lookup: {
+          from: "winningnumbers",
+          let: { lotteryCategoryName: "$lotteryCategoryName", date: "$date" },
           pipeline: [
             {
               $match: {
@@ -102,38 +251,15 @@ exports.matchWinningNumbers = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "paymentterms",
-          let: { lotteryCategoryName: "$lotteryCategoryName" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$lotteryCategoryName", "$$lotteryCategoryName"] },
-                    { $eq: ["$subAdmin", subAdminId] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "paymentTerms",
-        },
-      },
-      // {
-      //   $addFields: {
-      //   debugPaymentTerms: "$paymentTerms",
-      // },
-      // },
-      {
         $project: {
-          seller: 1,
+          seller: "$sellerInfo.userName",
+          supervisor: "$sellerInfo.supervisor",
           ticketId: 1,
           date: 1,
           lotteryCategoryName: 1,
           numbers: 1,
           winningNumbers: 1,
-          paymentTerms: 1,
+          paymentTerms: { $arrayElemAt: ["$paymentTerms", 0] },
         },
       },
       {
@@ -149,6 +275,11 @@ exports.matchWinningNumbers = async (req, res) => {
         res.send({ success: false, message: "not found!" });
       } else {
         const winTicket = [];
+
+        if(result.length==0){
+          res.send({ success: true, data: resultBySeller });
+          return
+        }
         
         // Process the result
         result.forEach((item) => {
