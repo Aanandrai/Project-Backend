@@ -659,10 +659,10 @@ exports.getSaleReportsForSeller = async (req, res) => {
     let paidAmount = 0;
     // console.log("result",result)
    
-    // if(result.length==0){
-    //   res.send({ success: true, data: {}});
-    //   return
-    // }
+    if(result.length==0){
+      res.send({ success: true, data: {}});
+      return
+    }
 
     result.forEach((item) => {
       const numbers = item?.numbers;
