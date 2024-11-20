@@ -125,6 +125,7 @@ exports.newTicket = async (req, res) => {
 
     const lotInfo = await Lottery.findOne({ lotteryName: lotteryCategoryName });
     console.log(lotInfo)
+    console.log("numbers",numbers)
     if (
       moment(currentTime, "HH:mm").isAfter(
         moment(lotInfo.startTime, "HH:mm")
@@ -181,6 +182,7 @@ exports.newTicket = async (req, res) => {
             return;
           } else {
             const newId = savedTicket.ticketId;
+            console.loog(lotteryCategoryName)
             console.log(new_numbers)
             console.log("new ticket is successfull")
             res.send(

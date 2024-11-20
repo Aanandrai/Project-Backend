@@ -279,7 +279,7 @@ exports.matchWinningNumbers = async (req, res) => {
         const winTicket = [];
 
         if(result.length==0){
-          res.send({ success: true, data: resultBySeller });
+          res.send({ success: true, data: {} });
           return
         }
         
@@ -356,7 +356,7 @@ exports.matchWinningNumbers = async (req, res) => {
       }
     });
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.status(500).send(err);
   }
 };
